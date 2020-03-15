@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"target": "es5",
+		"module": "amd",
+		"declaration": true,
+		"outDir": "./lib",
+		"strict": true,
+		"moduleResolution": "node",
+		"experimentalDecorators": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"sourceMap": true,
+		"baseUrl": ".",
+		"types": [
+			"node",
+			"jest"
+		],
+		"lib": [
+			"esnext"
+		]
+	},
+	"include": [
+		"src"
+	],
+	"exclude": [
+		"node_modules",
+		"node_modules/**",
+		"src/test/**"
+	]
+}

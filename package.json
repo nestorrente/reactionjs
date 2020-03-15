@@ -1,0 +1,32 @@
+{
+	"name": "reactive-model",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "jest --config jestconfig.json",
+		"build": "tsc-bundle ./tsconfig.json --outFile dist/dist.js --exportAs Reaction",
+		"build-watch": "tsc-bundle ./tsconfig.json --outFile dist/dist.js --exportAs Reaction --watch",
+		"format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+		"lint": "tslint -p tsconfig.json"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@types/jest": "^25.1.4",
+		"jest": "^25.1.0",
+		"prettier": "^1.19.1",
+		"ts-jest": "^25.2.1",
+		"tslint": "^6.0.0",
+		"tslint-config-prettier": "^1.18.0",
+		"typescript": "^3.8.3",
+		"typescript-bundle": "^1.0.16"
+	},
+	"files": [
+		"lib/**/*"
+	],
+	"dependencies": {
+		"@types/node": "^13.9.0"
+	}
+}
