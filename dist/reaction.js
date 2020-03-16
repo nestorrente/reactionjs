@@ -1,3 +1,11 @@
+/*!
+ * Reaction.js v0.1.0
+ * https://github.com/nestorrente/reactionjs
+ *
+ * Released under the MIT License.
+ *
+ * Build date: 2020-03-16T14:29:45.733Z
+ */
 var Reaction = (function () {
     var defines = {};
     var entry = [null];
@@ -445,6 +453,7 @@ var Reaction = (function () {
                 onInvalidate: function (watcher) {
                     if (recomputingTimeoutId == null) {
                         // Enqueue recomputing
+                        // TODO create a nextTick function that uses setImmediate()/setTimeout()
                         recomputingTimeoutId = setTimeout(function () {
                             watcher.getResult();
                         }, 0);
@@ -472,7 +481,7 @@ var Reaction = (function () {
         exports.watch = watch_1.default;
         exports.computed = computed_1.default;
     });
-    //# sourceMappingURL=dist.js.map
+    //# sourceMappingURL=reaction.js.map
     'marker:resolver';
 
     function get_define(name) {

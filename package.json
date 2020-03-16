@@ -5,8 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "jest --config jestconfig.json",
-		"build": "tsc-bundle ./tsconfig.json --outFile dist/dist.js --exportAs Reaction",
-		"build-watch": "tsc-bundle ./tsconfig.json --outFile dist/dist.js --exportAs Reaction --watch",
+		"build": "tsc-bundle ./tsconfig.json --outFile dist/reaction.js --exportAs Reaction --transform ./preprocessor.js",
+		"build-watch": "tsc-bundle ./tsconfig.json --outFile dist/reaction.js --exportAs Reaction --watch",
 		"format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
 		"lint": "tslint -p tsconfig.json"
 	},
