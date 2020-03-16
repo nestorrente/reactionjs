@@ -7,7 +7,31 @@ Reactive objects, computed properties and watchers inspired by Vue.js [Compositi
 
 We are working hard to bring you a production-ready library as soon as possible :pick:
 
-## Usage examples
+## Usage
+
+### Using import
+
+```javascript
+import {reactive} from 'reactionjs';
+
+const pokemon = reactive({
+    name: 'Pikachu',
+    level: 5
+});
+```
+
+### On the browser
+
+Reaction.js creates the global object `Reaction`, which contains all the exported methods:
+
+```javascript
+const pokemon = Reaction.reactive({
+    name: 'Pikachu',
+    level: 5
+});
+```
+
+## Method reference
 
 ### ref(value)
 
