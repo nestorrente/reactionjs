@@ -7,9 +7,25 @@ Reactive objects, computed properties and watchers inspired by Vue.js [Compositi
 
 We are working hard to bring you a production-ready library as soon as possible :pick:
 
+## Table of contents
+
++ **[Why Reaction.js?](#why-reactionjs)**
++ **[Usage](#usage)**
+    + **[ES6 module (import)](#es6-module-import)**
+    + **[Reaction object (browser)](#reaction-object-browser)**
++ **[Method reference](#method-reference)**
+    + **[ref(value)](#ref-value-)**
+    + **[reactive(object)](#reactive-object-)**
+    + **[computed(callback)](#computed-callback-)**
+    + **[watch(callback)](#watch-callback-)**
+
+## Why Reaction.js?
+
+... work in progress... :pick:
+
 ## Usage
 
-### Using import
+### ES6 module (import)
 
 ```javascript
 import {reactive} from 'reactionjs';
@@ -20,7 +36,7 @@ const pokemon = reactive({
 });
 ```
 
-### On the browser
+### Reaction object (browser)
 
 Reaction.js creates the global object `Reaction`, which contains all the exported methods:
 
