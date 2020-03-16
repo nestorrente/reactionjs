@@ -14,6 +14,8 @@ We are working hard to bring you a production-ready library as soon as possible 
 Creates a reactive object representing a single value:
 
 ```javascript
+import {ref} from 'reactionjs';
+
 const name = ref('Pikachu');
 console.log(name.value); // "Pikachu"
 
@@ -26,6 +28,8 @@ console.log(name.value); // "Charizad"
 Creates a reactive object with multiple properties:
 
 ```javascript
+import {reactive} from 'reactionjs';
+
 const pokemon = reactive({
     name: 'Pikachu',
     level: 5,
@@ -51,6 +55,8 @@ console.log(pokemon.level); // 6
 You can also use a reference as the value of a property. When getting the value of a reactive object's property, references are automatically unwrapped (as Vue.js does):
 
 ```javascript
+import {ref, reactive} from 'reactionjs';
+
 const name = ref('Pikachu');
 
 const pokemon = reactive({
@@ -74,6 +80,8 @@ _Note:_
 Calling `reactive()` returns a new object that is observed. Changes made to this object will be reflected on the original one:
 
 ```javascript
+import {reactive} from 'reactionjs';
+
 const originalObject = {
     name: 'Pikachu',
     // ... other properties...
@@ -135,6 +143,8 @@ We recommend you to use the great [Immutable.js](https://github.com/immutable-js
 Creates a read-only reference whose value is the result of invoking the `callback` function. It's value is automatically updated when any of its dependencies change:
 
 ```javascript
+import {reactive, computed} from 'reactionjs';
+
 const pokemon = reactive({
     name: 'Pikachu',
     level: 5,
@@ -155,6 +165,8 @@ console.log(validLevel.value); // false
 You can also use a reference as a dependency:
 
 ```javascript
+import {ref, computed} from 'reactionjs';
+
 const level = ref(5);
 
 const validLevel = computed(() => {
@@ -175,6 +187,8 @@ validLevel.value = true; // Error: Cannot modify the value of a readonly referen
 Allows you to execute a function when a value changes:
 
 ```javascript
+import {reactive, watch} from 'reactionjs';
+
 const pokemon = reactive({
     name: 'Pikachu',
     level: 5,
