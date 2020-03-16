@@ -187,9 +187,24 @@ watch(() => {
 });
 // console output: "Pikachu grew to level 5"
 
-pokemon.name = 'Charizard';
-// console output: "Charizard grew to level 5"
-
 pokemon.level = 6;
-// console output: "Charizard grew to level 6"
+// console output: "Pikachu grew to level 6"
+```
+
+Watchers are executed asynchronously, so you can do several modifications in a row:
+
+```javascript
+pokemon.name = 'Charizard';
+pokemon.level = 36;
+// watcher is only executed once
+// console output: "Charizard grew to level 36"
+```
+
+You can force intermediate executions by using `setTimeout()` with a time of 0 ms.:
+
+```javascript
+pokemon.name = 'Mewtwo';
+setTimeout(() => pokemon.level = 70, 0);
+// console output: "Mewtwo grew to level 36"
+// console output: "Mewtwo grew to level 70"
 ```

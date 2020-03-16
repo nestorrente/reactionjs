@@ -10,6 +10,7 @@ export default function watch(callback: WatcherCallback<void>): void {
 		onInvalidate(watcher: Watcher<void>): void {
 			if (recomputingTimeoutId == null) {
 				// Enqueue recomputing
+				// TODO create a nextTick function that uses setImmediate()/setTimeout()
 				recomputingTimeoutId = setTimeout(() => {
 					watcher.getResult();
 				}, 0);
