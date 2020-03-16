@@ -472,15 +472,6 @@ var Reaction = (function () {
         exports.watch = watch_1.default;
         exports.computed = computed_1.default;
     });
-    define("__tests__/Reactive.test", ["require", "exports", "index"], function (require, exports, index_1) {
-        "use strict";
-        Object.defineProperty(exports, "__esModule", { value: true });
-        var level = index_1.ref(5);
-        var validLevel = index_1.computed(function () { return level.value > 1 && level.value <= 100; });
-        var validLevelText = index_1.computed(function () { return validLevel.value ? 'Valid' : 'Invalid'; });
-    });
-    // watch(() => console.log('Valid level text changed to:', validLevelText.value));
-    // watch(() => validLevelText.value, (val) => console.log('Valid level text changed to:', val));
     //# sourceMappingURL=dist.js.map
     'marker:resolver';
 

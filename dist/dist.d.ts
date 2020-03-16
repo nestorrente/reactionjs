@@ -148,4 +148,3 @@ declare module "index" {
     import { Ref } from "types";
     export { ref, reactive, watch, computed, Ref };
 }
-declare module "__tests__/Reactive.test" { }
