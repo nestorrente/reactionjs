@@ -10,6 +10,9 @@ We are working hard to bring you a production-ready library as soon as possible 
 ## Table of contents
 
 + **[Why Reaction.js?](#why-reactionjs)**
++ **[Installation](#installation)**
+    + **[Using NPM](#using-npm)**
+    + **[Using `<script>` tag](#using-script-tag)**
 + **[Usage](#usage)**
     + **[ES6 module (import)](#es6-module-import)**
     + **[Reaction object (browser)](#reaction-object-browser)**
@@ -20,6 +23,16 @@ We are working hard to bring you a production-ready library as soon as possible 
     + **[watch(callback)](#watch-callback-)**
 
 ## Why Reaction.js?
+
+... work in progress... :pick:
+
+## Installation
+
+### Using NPM
+
+... work in progress... :pick:
+
+### Using `<script>` tag
 
 ... work in progress... :pick:
 
