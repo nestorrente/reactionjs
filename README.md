@@ -75,7 +75,7 @@ Calling `reactive()` returns a new object that is observed. Changes made to this
 
 ```javascript
 const originalObject = {
-	name: 'Pikachu',
+    name: 'Pikachu',
     // ... other properties...
 };
 
@@ -90,13 +90,13 @@ However, changes made to the original object will not tracked by the system. The
 ```javascript
 // Bad 👎
 const pokemon = {
-	// ...
+    // ...
 };
 reactive(pokemon);
 
 // Good 👍
 const pokemon = reactive({
-	// ...
+    // ...
 });
 ```
 
@@ -136,14 +136,14 @@ Creates a read-only reference whose value is the result of invoking the `callbac
 
 ```javascript
 const pokemon = reactive({
-	name: 'Pikachu',
-	level: 5,
+    name: 'Pikachu',
+    level: 5,
     // ... other properties...
 });
 
 const validLevel = computed(() => {
-	const { level } = pokemon;
-	return level > 1 && level <= 100;
+    const { level } = pokemon;
+    return level > 1 && level <= 100;
 });
 
 console.log(validLevel.value); // true
@@ -158,8 +158,8 @@ You can also use a reference as a dependency:
 const level = ref(5);
 
 const validLevel = computed(() => {
-	const { value } = level;
-	return value > 1 && value <= 100;
+    const { value } = level;
+    return value > 1 && value <= 100;
 });
 
 console.log(validLevel.value); // true
@@ -176,14 +176,14 @@ Allows you to execute a function when a value changes:
 
 ```javascript
 const pokemon = reactive({
-	name: 'Pikachu',
-	level: 5,
+    name: 'Pikachu',
+    level: 5,
     // ... other properties...
 });
 
 watch(() => {
-	const { name, level } = pokemon;
-	console.log(`${name} grew to level ${level}`);
+    const { name, level } = pokemon;
+    console.log(`${name} grew to level ${level}`);
 });
 // console output: "Pikachu grew to level 5"
 
