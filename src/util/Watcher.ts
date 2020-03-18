@@ -1,6 +1,6 @@
-import {propertyEventBus} from './property-event-bus';
-import {ReactiveObject} from './types';
-import callbackDependencyListener from './CallbackDependencyListener';
+import propertyEventBus from './property-event-bus';
+import ReactiveObject from '../util/ReactiveObject';
+import callbackDependencyListener from './callback-dependency-listener';
 
 export interface WatcherDependency {
 	object: any;

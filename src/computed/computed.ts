@@ -1,6 +1,6 @@
-import {COMPUTED_REF_PROP_NAME, Ref, REF_PROP_NAME} from './types';
-import {propertyEventBus} from './property-event-bus';
-import Watcher, {WatcherCallback, WatcherOptions} from './Watcher';
+import Ref, {REF_PROP_NAME} from '../util/Ref';
+import propertyEventBus from '../util/property-event-bus';
+import Watcher, {WatcherCallback, WatcherOptions} from '../util/Watcher';
 
 export default function computed<T>(callback: WatcherCallback<T>): Readonly<Ref<T>> {
 
@@ -41,7 +41,6 @@ export function createReadonlyRef<T>(getter: () => T): Readonly<Ref<T>> {
 	};
 
 	Object.defineProperty(refObject, REF_PROP_NAME, {value: true});
-	Object.defineProperty(refObject, COMPUTED_REF_PROP_NAME, {value: true});
 
 	return refObject as Ref<T>;
 

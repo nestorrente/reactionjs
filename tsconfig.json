@@ -1,15 +1,16 @@
 {
 	"compilerOptions": {
 		"target": "es5",
-		"module": "amd",
+		"module": "ES6",
 		"declaration": true,
-		"outDir": "./lib",
+		"outDir": "./dist",
 		"strict": true,
 		"moduleResolution": "node",
 		"experimentalDecorators": true,
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,
 		"sourceMap": true,
+		"declarationMap": true,
 		"baseUrl": ".",
 		"types": [
 			"node",

@@ -1,4 +1,4 @@
-import EventBus from './EventBus';
+import EventBus from '@nestorrente/event-bus';
 
 export type ReadListener<T> = (object: any, propName: string, value: T) => void;
 export type InvalidateListener = (object: any, propName: string) => void;
@@ -51,4 +51,5 @@ export class PropertyEventBus {
 
 }
 
-export const propertyEventBus = new PropertyEventBus();
+const propertyEventBus = new PropertyEventBus();
+export default propertyEventBus;

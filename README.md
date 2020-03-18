@@ -1,4 +1,3 @@
-
 # Reaction.js
 
 Reactive objects, computed properties and watchers inspired by Vue.js [Composition API](https://github.com/vuejs/composition-api-rfc).
@@ -62,7 +61,11 @@ const pokemon = Reaction.reactive({
 
 ## Method reference
 
-### ref(value)
+### References
+
+```typescript
+ref<T>(value: T): Ref<T>
+```
 
 Creates a reactive object representing a single value:
 
@@ -76,7 +79,11 @@ name.value = 'Charizard';
 console.log(name.value); // "Charizad"
 ```
 
-### reactive(object)
+### Reactive objects
+
+```typescript
+reactive<T>(object: T): T
+```
 
 Creates a reactive object with multiple properties:
 
@@ -128,7 +135,7 @@ pokemon.name = 'Mewtwo';
 console.log(name.value); // "Mewtwo"
 ```
 
-_Note:_
+**_Note:_**
 
 Calling `reactive()` returns a new object that is observed. Changes made to this object will be reflected on the original one:
 
@@ -191,7 +198,11 @@ pokemon.moves = pokemon.moves.slice(0, -1);
 
 We recommend you to use the great [Immutable.js](https://github.com/immutable-js/immutable-js) library for this purpouse.
 
-### computed(callback)
+### Computed properties
+
+```typescript
+computed<T>(callback: () => T): Ref<T>
+```
 
 Creates a read-only reference whose value is the result of invoking the `callback` function. It's value is automatically updated when any of its dependencies change:
 
@@ -235,9 +246,13 @@ console.log(validLevel.value); // false
 validLevel.value = true; // Error: Cannot modify the value of a readonly reference
 ```
 
-### watch(callback)
+### Watchers
 
-Allows you to execute a function when a value changes:
+```typescript
+watch(callback: () => void): void
+```
+
+Allows you to define a watcher function that will be executed every time a value changes:
 
 ```javascript
 import {reactive, watch} from 'reactionjs';

@@ -1,4 +1,4 @@
-import {propertyEventBus, ReadListener} from './property-event-bus';
+import propertyEventBus, {ReadListener} from './property-event-bus';
 
 export type Callback<T> = () => T;
 

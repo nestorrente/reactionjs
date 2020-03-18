@@ -1,4 +1,4 @@
-import Watcher, {WatcherCallback, WatcherOptions} from './Watcher';
+import Watcher, {WatcherCallback, WatcherOptions} from '../util/Watcher';
 
 // TODO añadir la opción de un watch que reciba un callback de dependencias () => any / () => any[]
 

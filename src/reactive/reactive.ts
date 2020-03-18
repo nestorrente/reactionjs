@@ -1,6 +1,7 @@
-import {Dictionary, isArray, isPlainObject} from './utils';
-import {propertyEventBus} from './property-event-bus';
-import {isReactive, isRef, REACTIVE_ID_PROP_NAME, ReactivePlainObject} from './types';
+import {Dictionary, isArray, isPlainObject} from '../utils';
+import propertyEventBus from '../util/property-event-bus';
+import {isRef} from '../util/Ref';
+import {isReactive, REACTIVE_ID_PROP_NAME, ReactivePlainObject} from '../util/ReactiveObject';
 
 export default function reactive<T>(object: T): T {
 

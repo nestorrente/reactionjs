@@ -1,5 +1,5 @@
-import reactive from './reactive';
-import {Ref, REF_PROP_NAME} from './types';
+import reactive from '../reactive/reactive';
+import Ref, {REF_PROP_NAME} from '../util/Ref';
 
 export default function ref<T>(value: T): Ref<T> {
 
