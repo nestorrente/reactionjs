@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 
 const BUNDLE_HEADER = `
-Reaction.js v0.1.3
+Reaction.js v0.1.4
 https://github.com/nestorrente/reactionjs
 
 Released under the MIT License.
@@ -51,12 +51,13 @@ const standaloneConfig = {
 
 const moduleConfig = {
 	...commonConfig,
-	externals: {
-		'@nestorrente/event-bus': 'commonjs2 @nestorrente/event-bus'
+	optimization: {
+		minimize: false
 	},
 	output: {
 		...commonConfig.output,
 		filename: 'reaction.esm.js',
+		libraryTarget: 'umd'
 	}
 };
 
