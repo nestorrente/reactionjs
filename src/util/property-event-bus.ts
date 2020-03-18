@@ -10,7 +10,6 @@ export class PropertyEventBus {
 
 	constructor() {
 		this.eventBus = new EventBus();
-
 	}
 
 	public addReadListener(listener: ReadListener<any>) {

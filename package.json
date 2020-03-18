@@ -12,7 +12,7 @@
 		"lint": "tslint -p tsconfig.json"
 	},
 	"keywords": [],
-	"author": "",
+	"author": "Néstor Pérez González",
 	"license": "ISC",
 	"devDependencies": {
 		"@types/jest": "^25.1.4",
@@ -29,7 +29,7 @@
 		"webpack-cli": "^3.3.11"
 	},
 	"dependencies": {
-		"@nestorrente/event-bus": "^1.0.2"
+		"@nestorrente/event-bus": "^1.0.3"
 	},
 	"files": [
 		"lib/**/*"

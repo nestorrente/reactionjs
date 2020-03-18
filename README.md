@@ -16,10 +16,10 @@ We are working hard to bring you a production-ready library as soon as possible 
     + **[ES6 module (import)](#es6-module-import)**
     + **[Reaction object (browser)](#reaction-object-browser)**
 + **[Method reference](#method-reference)**
-    + **[ref(value)](#ref-value-)**
-    + **[reactive(object)](#reactive-object-)**
-    + **[computed(callback)](#computed-callback-)**
-    + **[watch(callback)](#watch-callback-)**
+    + **[ref()](#ref)**
+    + **[reactive()](#reactive)**
+    + **[computed()](#computed)**
+    + **[watch()](#watch)**
 
 ## Why Reaction.js?
 
@@ -61,7 +61,7 @@ const pokemon = Reaction.reactive({
 
 ## Method reference
 
-### References
+### ref()
 
 ```typescript
 ref<T>(value: T): Ref<T>
@@ -79,7 +79,7 @@ name.value = 'Charizard';
 console.log(name.value); // "Charizad"
 ```
 
-### Reactive objects
+### reactive()
 
 ```typescript
 reactive<T>(object: T): T
@@ -198,7 +198,7 @@ pokemon.moves = pokemon.moves.slice(0, -1);
 
 We recommend you to use the great [Immutable.js](https://github.com/immutable-js/immutable-js) library for this purpouse.
 
-### Computed properties
+### computed()
 
 ```typescript
 computed<T>(callback: () => T): Ref<T>
@@ -246,7 +246,7 @@ console.log(validLevel.value); // false
 validLevel.value = true; // Error: Cannot modify the value of a readonly reference
 ```
 
-### Watchers
+### watch()
 
 ```typescript
 watch(callback: () => void): void
