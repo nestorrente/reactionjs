@@ -1,6 +1,6 @@
 {
 	"name": "@nestorrente/reactionjs",
-	"version": "0.1.4",
+	"version": "0.2.0",
 	"description": "",
 	"main": "dist/reaction.js",
 	"module": "dist/reaction.esm.js",
@@ -36,6 +36,6 @@
 		"url": "https://github.com/nestorrente/reactionjs.git"
 	},
 	"dependencies": {
-		"@nestorrente/event-bus": "^1.0.4"
+		"@nestorrente/event-bus": "^1.0.5"
 	}
 }

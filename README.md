@@ -29,15 +29,41 @@ We are working hard to bring you a production-ready library as soon as possible 
 
 ### Using NPM
 
-... work in progress... :pick:
+Install the latest stable version...
+
+```bash
+npm install --save @nestorrente/event-bus
+```
+
+... then you can import Reaction.js methods in your modules:
+
+```javascript
+import {ref, reactive, computed, watch} from '@nestorrente/reactionjs';
+```
 
 ### Using `<script>` tag
 
-... work in progress... :pick:
+You can [download the latest version from here](dist/reaction.js). Then, you can use it as any other JavaScript file:
+
+```html
+<script src="reaction.js"></script>
+```
+
+Or, if you prefer, you can use any of the following CDN repositories:
+
+```html
+<!-- Unpkg -->
+<script src="https://unpkg.com/@nestorrente/reactionjs@0.2.0"></script>
+
+<!-- JsDelivr -->
+<script src="https://cdn.jsdelivr.net/npm/@nestorrente/reactionjs@0.2.0"></script>
+```
+
+The script will create a global  `Reaction` object, which contains all the exported methods.
 
 ## Usage
 
-### ES6 module (import)
+### Using `import`
 
 ```javascript
 import {reactive} from 'reactionjs';
@@ -48,12 +74,23 @@ const pokemon = reactive({
 });
 ```
 
-### Reaction object (browser)
+### Using `Reaction` object
 
-Reaction.js creates the global object `Reaction`, which contains all the exported methods:
+You can invoke any method just by doing `Reaction.methodName()`:
 
 ```javascript
 const pokemon = Reaction.reactive({
+    name: 'Pikachu',
+    level: 5
+});
+```
+
+You can also use ES6 _destructuring assignment_ in order to imitate module imports:
+
+```javascript
+const {reactive} = Reaction;
+
+const pokemon = reactive({
     name: 'Pikachu',
     level: 5
 });
@@ -70,8 +107,6 @@ ref<T>(value: T): Ref<T>
 Creates a reactive object representing a single value:
 
 ```javascript
-import {ref} from 'reactionjs';
-
 const name = ref('Pikachu');
 console.log(name.value); // "Pikachu"
 
@@ -88,8 +123,6 @@ reactive<T>(object: T): T
 Creates a reactive object with multiple properties:
 
 ```javascript
-import {reactive} from 'reactionjs';
-
 const pokemon = reactive({
     name: 'Pikachu',
     level: 5,
@@ -153,18 +186,18 @@ reactiveObject.name = 'Charizard';
 console.log(originalObject.name); // "Charizard"
 ```
 
-However, changes made to the original object will not tracked by the system. The recommendation is to not store the original object and always use the one created by `reactive()`:
+However, changes made to the original object will not tracked by the system. The recommendation is to not store the original object and always use the one returned by `reactive()`:
 
 ```javascript
-// Bad 👎
+// Don't do this 👎
 const pokemon = {
-    // ...
+    name: 'Pikachu'
 };
 reactive(pokemon);
 
-// Good 👍
+// Do this instead 👍
 const pokemon = reactive({
-    // ...
+    name: 'Pikachu'
 });
 ```
 
@@ -196,7 +229,7 @@ pokemon.moves = ['Thunder', ...pokemon.moves.slice(1)];
 pokemon.moves = pokemon.moves.slice(0, -1);
 ```
 
-We recommend you to use the great [Immutable.js](https://github.com/immutable-js/immutable-js) library for this purpouse.
+As writing code like that can be a little frustrating, we recommend you to use the great [Immutable.js](https://github.com/immutable-js/immutable-js) library for this purpouse :slightly_smiling_face:
 
 ### computed()
 
@@ -207,43 +240,40 @@ computed<T>(callback: () => T): Ref<T>
 Creates a read-only reference whose value is the result of invoking the `callback` function. It's value is automatically updated when any of its dependencies change:
 
 ```javascript
-import {reactive, computed} from 'reactionjs';
-
 const pokemon = reactive({
-    name: 'Pikachu',
-    level: 5,
-    // ... other properties...
+    name: 'Pikachu'
 });
 
-const validLevel = computed(() => {
-    const { level } = pokemon;
-    return level > 1 && level <= 100;
+const upperCaseName = computed(() => {
+    return pokemon.name.toUpperCase();
 });
 
-console.log(validLevel.value); // true
+console.log(upperCaseName.value); // "PIKACHU"
 
-pokemon.level = 0;
-console.log(validLevel.value); // false
+pokemon.name = 'Charizard';
+console.log(upperCaseName.value); // "CHARIZARD"
 ```
 
 You can also use a reference as a dependency:
 
 ```javascript
-import {ref, computed} from 'reactionjs';
+const name = ref('Pikachu');
 
-const level = ref(5);
-
-const validLevel = computed(() => {
-    const { value } = level;
-    return value > 1 && value <= 100;
+const upperCaseName = computed(() => {
+    return name.value.toUpperCase();
 });
 
-console.log(validLevel.value); // true
+console.log(upperCaseName.value); // "PIKACHU"
 
-level.value = 0;
-console.log(validLevel.value); // false
+name.value = 'Charizard';
+console.log(upperCaseName.value); // "CHARIZARD"
+```
 
-validLevel.value = true; // Error: Cannot modify the value of a readonly reference
+If you try to modify a computed property, you will get an error:
+
+```javascript
+upperCaseName.value = 'MEWTWO';
+// Error: Cannot modify the value of a readonly reference
 ```
 
 ### watch()
@@ -252,41 +282,82 @@ validLevel.value = true; // Error: Cannot modify the value of a readonly referen
 watch(callback: () => void): void
 ```
 
-Allows you to define a watcher function that will be executed every time a value changes:
+Allows you to define a watcher function that will be executed every time one of it's dependencies changes. The watcher is executed immediately after being created, so it can know what its dependencies are:
 
 ```javascript
-import {reactive, watch} from 'reactionjs';
-
 const pokemon = reactive({
     name: 'Pikachu',
-    level: 5,
-    // ... other properties...
+    level: 5
 });
 
 watch(() => {
     const { name, level } = pokemon;
     console.log(`${name} grew to level ${level}`);
 });
-// console output: "Pikachu grew to level 5"
 
 pokemon.level = 6;
-// console output: "Pikachu grew to level 6"
+```
+
+Console output will be:
+
+```javascript
+"Pikachu grew to level 5" // initial watcher's execution
+"Pikachu grew to level 6" // execution after changing "level" to 6
 ```
 
 Watchers are executed asynchronously, so you can do several modifications in a row:
 
 ```javascript
-pokemon.name = 'Charizard';
-pokemon.level = 36;
-// watcher is only executed once
-// console output: "Charizard grew to level 36"
+pokemon.level = 7;
+pokemon.level = 8;
+pokemon.level = 9;
+pokemon.level = 10;
 ```
 
-You can force intermediate executions by using `setTimeout()` with a time of 0 ms.:
+Console output will be:
 
 ```javascript
-pokemon.name = 'Mewtwo';
-setTimeout(() => pokemon.level = 70, 0);
-// console output: "Mewtwo grew to level 36"
-// console output: "Mewtwo grew to level 70"
+"Pikachu grew to level 10" // watcher will execute only after the last change
+```
+
+You can force intermediate executions by using the [`nextTick()`](#nextTick) function.
+
+### nextTick()
+
+```typescript
+nextTick(callback: () => void): void
+```
+
+Allows you to execute a portion of code in the next event cycle of the execution environment. This is actually the same as `setTimeout(callback, 0)`.
+
+This method is very useful when you are doing multiple data modifications and you want to let watchers being executed between those changes:
+
+```javascript
+const pokemon = reactive({
+    name: 'Pikachu',
+    level: 5
+});
+
+watch(() => {
+    const { name, level } = pokemon;
+    console.log(`${name} grew to level ${level}`);
+});
+
+pokemon.level = 6;
+pokemon.level = 7;
+pokemon.level = 8;
+
+nextTick(() => {
+    pokemon.level = 9;
+    pokemon.level = 10;
+});
+
+```
+
+Console output will be:
+
+```javascript
+"Pikachu grew to level 5" // initial watcher's execution
+"Pikachu grew to level 8" // watcher's execution before nextTick() callback
+"Pikachu grew to level 10" // watcher's execution after nextTick() callback
 ```
