@@ -1,3 +1,3 @@
-export function nextTick(callback: () => void): void {
+export default function nextTick(callback: () => void): void {
 	setTimeout(callback, 0);
 }

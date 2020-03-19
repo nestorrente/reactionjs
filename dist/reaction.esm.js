@@ -4,7 +4,7 @@
  * 
  * Released under the MIT License.
  * 
- * Build date: 2020-03-19T15:53:51.685Z
+ * Build date: 2020-03-19T23:14:48.227Z
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -132,18 +132,10 @@ __webpack_require__.d(__webpack_exports__, "computed", function() { return /* re
 __webpack_require__.d(__webpack_exports__, "watch", function() { return /* reexport */ watch; });
 __webpack_require__.d(__webpack_exports__, "nextTick", function() { return /* reexport */ nextTick; });
 
-// CONCATENATED MODULE: ./src/utils.ts
+// CONCATENATED MODULE: ./src/util/is-plain-object.ts
 var _toString = Object.prototype.toString;
 function isPlainObject(value) {
     return _toString.apply(value) === '[object Object]';
-}
-function isArray(value) {
-    return Array.isArray(value);
-}
-var nextUniqueId = 1;
-function uniqueId(prefix) {
-    if (prefix === void 0) { prefix = ''; }
-    return '' + prefix + (nextUniqueId++);
 }
 
 // EXTERNAL MODULE: ./node_modules/@nestorrente/event-bus/dist/event-bus.esm.js
@@ -222,7 +214,7 @@ function doMakeReactiveChain(value) {
     if (isPlainObject(value)) {
         return createReactiveObject(value);
     }
-    if (isArray(value)) {
+    if (Array.isArray(value)) {
         return createReactiveArray(value);
     }
     return value;
@@ -323,9 +315,10 @@ var callbackDependencyListener = new callback_dependency_listener_CallbackDepend
 // CONCATENATED MODULE: ./src/util/Watcher.ts
 
 
+
 var Watcher_Watcher = /** @class */ (function () {
-    function Watcher(callback, options) {
-        this.callback = callback;
+    function Watcher(source, options) {
+        this.callback = convertSourceToCallback(source);
         this.options = options;
         this.dependencies = [];
         this.invalidated = true;
@@ -373,25 +366,28 @@ var Watcher_Watcher = /** @class */ (function () {
     return Watcher;
 }());
 /* harmony default export */ var util_Watcher = (Watcher_Watcher);
+function convertSourceToCallback(source) {
+    if (isRef(source)) {
+        return function () { return source.value; };
+    }
+    return source;
+}
 
 // CONCATENATED MODULE: ./src/methods/computed.ts
 
 
 
 function computed(callback) {
-    var options = {
+    var watcherInstance = new util_Watcher(callback, {
         onInvalidate: function (watcher) {
-            // console.log('Se invalida la computed');
             property_event_bus.triggerInvalidateEvent(refObject, 'value');
         },
         onRecompute: function (watcher, newExecutionResult, previousExecutionResult) {
-            // console.log('Se ejecuta el cálculo de la computed');
             if (newExecutionResult !== previousExecutionResult) {
                 property_event_bus.triggerChangeEvent(refObject, 'value', newExecutionResult, previousExecutionResult);
             }
         }
-    };
-    var watcherInstance = new util_Watcher(callback, options);
+    });
     var refObject = createReadonlyRef(function () {
         return watcherInstance.getResult();
     });
@@ -412,34 +408,49 @@ function createReadonlyRef(getter) {
     return refObject;
 }
 
-// CONCATENATED MODULE: ./src/methods/watch.ts
-
-// TODO añadir la opción de un watch que reciba un callback de dependencias () => any / () => any[]
-function watch(callback) {
-    var recomputingTimeoutId = null;
-    var options = {
-        onInvalidate: function (watcher) {
-            if (recomputingTimeoutId == null) {
-                // Enqueue recomputing
-                // TODO create a nextTick function that uses setImmediate()/setTimeout()
-                recomputingTimeoutId = setTimeout(function () {
-                    watcher.getResult();
-                }, 0);
-            }
-        },
-        onRecompute: function (watcher, newExecutionResult, previousExecutionResult) {
-            recomputingTimeoutId = null;
-        }
-    };
-    var watcherInstance = new util_Watcher(callback, options);
-    // Force first execution
-    watcherInstance.getResult();
-}
-
 // CONCATENATED MODULE: ./src/methods/nextTick.ts
 function nextTick(callback) {
     setTimeout(callback, 0);
 }
+
+// CONCATENATED MODULE: ./src/methods/watch.ts
+
+
+function watch(source, callback) {
+    var invalidated = false;
+    var watcherInstance = new util_Watcher(source, {
+        onInvalidate: function (watcher) {
+            if (!invalidated) {
+                // Enqueue recomputing
+                nextTick(function () {
+                    var result = watcher.getResult();
+                    if (callback != null) {
+                        callback(result);
+                    }
+                });
+                invalidated = true;
+            }
+        },
+        onRecompute: function (watcher, newExecutionResult, previousExecutionResult) {
+            invalidated = false;
+        }
+    });
+    watcherInstance.getResult();
+}
+// FIXME adaptar para permitir una flexibilidad similar (aunque más limitada) a la de la Composition API de Vue 3
+// type CleanupRegistrator = (invalidate: Runnable) => void;
+// type SimpleEffect = (onCleanup: CleanupRegistrator) => void;
+// type StopHandle = () => void;
+// type WatcherSource<T> = Ref<T> | Supplier<T>;
+// type WatcherCallBack<T> = (newVal: T, oldVal: T, onCleanup: CleanupRegistrator) => void;
+//
+// function watch2(source: SimpleEffect): StopHandle;
+// function watch2<T>(source: WatcherSource<T>, callback: WatcherCallBack<T>): StopHandle;
+// function watch2<T>(): StopHandle {
+// 	return () => {
+// 		// stop watching
+// 	};
+// }
 
 // CONCATENATED MODULE: ./src/methods/index.ts
 

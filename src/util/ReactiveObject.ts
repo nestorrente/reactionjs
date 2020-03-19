@@ -1,4 +1,4 @@
-import {Dictionary} from 'src/utils';
+import {Dictionary} from './types';
 
 export const REACTIVE_ID_PROP_NAME = '__reactive_id__';
 

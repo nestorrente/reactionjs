@@ -1,4 +1,4 @@
-import {Dictionary} from '../utils';
+import {Dictionary} from './types';
 
 export const REF_PROP_NAME = '__ref__';
 

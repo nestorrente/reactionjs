@@ -1,2 +1,2 @@
-export declare function nextTick(callback: () => void): void;
+export default function nextTick(callback: () => void): void;
 //# sourceMappingURL=nextTick.d.ts.map

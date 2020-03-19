@@ -1,23 +1,20 @@
 import Ref, {REF_PROP_NAME} from '../util/Ref';
 import propertyEventBus from '../util/property-event-bus';
-import Watcher, {WatcherCallback, WatcherOptions} from '../util/Watcher';
+import {Supplier} from '../util/types';
+import Watcher from '../util/Watcher';
 
-export default function computed<T>(callback: WatcherCallback<T>): Readonly<Ref<T>> {
+export default function computed<T>(callback: Supplier<T>): Readonly<Ref<T>> {
 
-	const options: WatcherOptions<T> = {
+	const watcherInstance = new Watcher(callback, {
 		onInvalidate(watcher: Watcher<T>): void {
-			// console.log('Se invalida la computed');
 			propertyEventBus.triggerInvalidateEvent(refObject, 'value');
 		},
 		onRecompute(watcher: Watcher<T>, newExecutionResult: T, previousExecutionResult?: T): void {
-			// console.log('Se ejecuta el cálculo de la computed');
 			if (newExecutionResult !== previousExecutionResult) {
 				propertyEventBus.triggerChangeEvent(refObject, 'value', newExecutionResult, previousExecutionResult);
 			}
 		}
-	};
-
-	const watcherInstance = new Watcher(callback, options);
+	});
 
 	const refObject = createReadonlyRef(() => {
 		return watcherInstance.getResult();
