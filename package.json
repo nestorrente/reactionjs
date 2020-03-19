@@ -1,6 +1,6 @@
 {
 	"name": "@nestorrente/reactionjs",
-	"version": "0.2.2",
+	"version": "0.2.3",
 	"description": "",
 	"main": "dist/reaction.js",
 	"module": "dist/reaction.esm.js",
@@ -11,9 +11,20 @@
 		"format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
 		"lint": "tslint -p tsconfig.json"
 	},
-	"keywords": [],
+	"keywords": [
+		"reactivity",
+		"reactive",
+		"model",
+		"watch",
+		"watcher",
+		"watchers",
+		"computed",
+		"derived",
+		"property",
+		"properties"
+	],
 	"author": "Néstor Pérez González",
-	"license": "ISC",
+	"license": "MIT",
 	"devDependencies": {
 		"@types/jest": "^25.1.4",
 		"@types/node": "^13.9.0",

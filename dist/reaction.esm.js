@@ -1,10 +1,10 @@
 /*!
- * Reaction.js v0.2.2
+ * Reaction.js v0.2.3
  * https://github.com/nestorrente/reactionjs
  * 
  * Released under the MIT License.
  * 
- * Build date: 2020-03-19T15:26:57.044Z
+ * Build date: 2020-03-19T15:53:51.685Z
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')

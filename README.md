@@ -2,7 +2,7 @@
 
 Reactive objects, computed properties and watchers inspired by Vue.js [Composition API](https://github.com/vuejs/composition-api-rfc).
 
-## :construction: Under construction
+## :construction: Under construction :construction:
 
 We are working hard to bring you a production-ready library as soon as possible :pick:
 
@@ -24,7 +24,13 @@ We are working hard to bring you a production-ready library as soon as possible 
 
 ## Why Reaction.js?
 
-... work in progress... :pick:
+The reason behind Reaction.js is to provide a way to use **reactive models**,
+computed properties and watchers in **non-Vue/React/Angular** environments.
+
+The scope of this library **has nothing to do with UI**.
+It doesn't provide a way to bind your model to de UI.
+However, you can achieve some kind of binding using watchers (see [watch()](#watch) method)
+and [event listeners](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener). 
 
 ## Installation
 
@@ -33,7 +39,7 @@ We are working hard to bring you a production-ready library as soon as possible 
 Install the latest stable version...
 
 ```bash
-npm install --save @nestorrente/event-bus
+npm install --save @nestorrente/reactionjs
 ```
 
 ... then you can import Reaction.js methods in your modules:
@@ -54,10 +60,10 @@ Or, if you prefer, you can use any of the following CDN repositories:
 
 ```html
 <!-- Unpkg -->
-<script src="https://unpkg.com/@nestorrente/reactionjs@0.2.2"></script>
+<script src="https://unpkg.com/@nestorrente/reactionjs@0.2.3"></script>
 
 <!-- JsDelivr -->
-<script src="https://cdn.jsdelivr.net/npm/@nestorrente/reactionjs@0.2.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@nestorrente/reactionjs@0.2.3"></script>
 ```
 
 The script will create a global  `Reaction` object, which contains all the exported methods.
