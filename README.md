@@ -20,6 +20,7 @@ We are working hard to bring you a production-ready library as soon as possible 
     + **[reactive()](#reactive)**
     + **[computed()](#computed)**
     + **[watch()](#watch)**
+    + **[nextTick()](#nexttick)**
 
 ## Why Reaction.js?
 
@@ -53,10 +54,10 @@ Or, if you prefer, you can use any of the following CDN repositories:
 
 ```html
 <!-- Unpkg -->
-<script src="https://unpkg.com/@nestorrente/reactionjs@0.2.0"></script>
+<script src="https://unpkg.com/@nestorrente/reactionjs@0.2.1"></script>
 
 <!-- JsDelivr -->
-<script src="https://cdn.jsdelivr.net/npm/@nestorrente/reactionjs@0.2.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@nestorrente/reactionjs@0.2.1"></script>
 ```
 
 The script will create a global  `Reaction` object, which contains all the exported methods.
@@ -320,7 +321,7 @@ Console output will be:
 "Pikachu grew to level 10" // watcher will execute only after the last change
 ```
 
-You can force intermediate executions by using the [`nextTick()`](#nextTick) function.
+You can force intermediate executions by using the [`nextTick()`](#nexttick) function.
 
 ### nextTick()
 
