@@ -4,7 +4,7 @@
  * 
  * Released under the MIT License.
  * 
- * Build date: 2020-03-19T23:14:48.227Z
+ * Build date: 2020-03-19T23:19:08.584Z
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -437,7 +437,7 @@ function watch(source, callback) {
     });
     watcherInstance.getResult();
 }
-// FIXME adaptar para permitir una flexibilidad similar (aunque más limitada) a la de la Composition API de Vue 3
+// FIXME adapt in order to give a similar (but more limited) flexibility to Vue's Composition API
 // type CleanupRegistrator = (invalidate: Runnable) => void;
 // type SimpleEffect = (onCleanup: CleanupRegistrator) => void;
 // type StopHandle = () => void;
