@@ -50,20 +50,20 @@ import {ref, reactive, computed, watch} from '@nestorrente/reactionjs';
 
 ### Using `<script>` tag
 
-You can [download the latest version from here](dist/reaction.js). Then, you can use it as any other JavaScript file:
+You can [download the latest version from here](dist/reaction.bundle.js). Then, you can use it as any other JavaScript file:
 
 ```html
-<script src="reaction.js"></script>
+<script src="reaction.bundle.js"></script>
 ```
 
 Or, if you prefer, you can use any of the following CDN repositories:
 
 ```html
 <!-- Unpkg -->
-<script src="https://unpkg.com/@nestorrente/reactionjs@0.2.3"></script>
+<script src="https://unpkg.com/@nestorrente/reactionjs@0.2.4"></script>
 
 <!-- JsDelivr -->
-<script src="https://cdn.jsdelivr.net/npm/@nestorrente/reactionjs@0.2.3"></script>
+<script src="https://cdn.jsdelivr.net/npm/@nestorrente/reactionjs@0.2.4"></script>
 ```
 
 The script will create a global  `Reaction` object, which contains all the exported methods.

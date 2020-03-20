@@ -1,8 +1,8 @@
 {
 	"name": "@nestorrente/reactionjs",
-	"version": "0.2.3",
+	"version": "0.2.4",
 	"description": "",
-	"main": "dist/reaction.js",
+	"main": "dist/reaction.bundle.js",
 	"module": "dist/reaction.esm.js",
 	"types": "dist/index.d.ts",
 	"scripts": {
