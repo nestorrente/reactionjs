@@ -1,5 +1,3 @@
-import {Dictionary} from './types';
-
 export const REF_PROP_NAME = '__ref__';
 
 export default interface Ref<T> {
@@ -7,6 +5,6 @@ export default interface Ref<T> {
 	value: T;
 }
 
-export function isRef(object: Dictionary<any>): object is Ref<any> {
-	return !!object[REF_PROP_NAME];
+export function isRef(value: any): value is Ref<any> {
+	return value != null && typeof value === 'object' && !!value[REF_PROP_NAME];
 }

@@ -1,7 +1,7 @@
 import callbackDependencyListener from './callback-dependency-listener';
 import propertyEventBus from './property-event-bus';
 import ReactiveObject from './ReactiveObject';
-import Ref, {isRef} from './Ref';
+import Ref from './Ref';
 import {Supplier} from './types';
 
 export interface WatcherDependency {
@@ -97,10 +97,10 @@ export default class Watcher<T> {
 
 function convertSourceToCallback<T>(source: WatcherSource<T>): Supplier<T> {
 
-	if (isRef(source)) {
-		return () => source.value;
+	if (typeof source === 'function') {
+		return source;
 	}
 
-	return source;
+	return () => source.value;
 
 }

@@ -4,7 +4,7 @@
  * 
  * Released under the MIT License.
  * 
- * Build date: 2020-03-20T16:04:28.921Z
+ * Build date: 2020-03-20T16:20:22.884Z
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -135,7 +135,7 @@ __webpack_require__.d(__webpack_exports__, "nextTick", function() { return /* re
 // CONCATENATED MODULE: ./src/util/is-plain-object.ts
 var _toString = Object.prototype.toString;
 function isPlainObject(value) {
-    return _toString.apply(value) === '[object Object]';
+    return value != null && typeof value === 'object' && _toString.apply(value) === '[object Object]';
 }
 
 // EXTERNAL MODULE: ./node_modules/@nestorrente/event-bus/dist/event-bus.esm.js
@@ -183,14 +183,14 @@ var propertyEventBus = new property_event_bus_PropertyEventBus();
 
 // CONCATENATED MODULE: ./src/util/Ref.ts
 var REF_PROP_NAME = '__ref__';
-function isRef(object) {
-    return !!object[REF_PROP_NAME];
+function isRef(value) {
+    return value != null && typeof value === 'object' && !!value[REF_PROP_NAME];
 }
 
 // CONCATENATED MODULE: ./src/util/ReactiveObject.ts
 var REACTIVE_ID_PROP_NAME = '__reactive_id__';
-function isReactive(object) {
-    return !!object[REACTIVE_ID_PROP_NAME];
+function isReactive(value) {
+    return value != null && typeof value === 'object' && !!value[REACTIVE_ID_PROP_NAME];
 }
 
 // CONCATENATED MODULE: ./src/methods/reactive.ts
@@ -315,7 +315,6 @@ var callbackDependencyListener = new callback_dependency_listener_CallbackDepend
 // CONCATENATED MODULE: ./src/util/Watcher.ts
 
 
-
 var Watcher_Watcher = /** @class */ (function () {
     function Watcher(source, options) {
         this.callback = convertSourceToCallback(source);
@@ -367,10 +366,10 @@ var Watcher_Watcher = /** @class */ (function () {
 }());
 /* harmony default export */ var util_Watcher = (Watcher_Watcher);
 function convertSourceToCallback(source) {
-    if (isRef(source)) {
-        return function () { return source.value; };
+    if (typeof source === 'function') {
+        return source;
     }
-    return source;
+    return function () { return source.value; };
 }
 
 // CONCATENATED MODULE: ./src/methods/computed.ts

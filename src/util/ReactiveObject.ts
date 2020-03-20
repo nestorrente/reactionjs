@@ -8,6 +8,6 @@ export default interface ReactiveObject {
 
 export type ReactivePlainObject = Dictionary<any> & ReactiveObject;
 
-export function isReactive(object: Dictionary<any>): object is ReactivePlainObject {
-	return !!object[REACTIVE_ID_PROP_NAME];
+export function isReactive(value: any): value is ReactivePlainObject {
+	return value != null && typeof value === 'object' && !!value[REACTIVE_ID_PROP_NAME];
 }
