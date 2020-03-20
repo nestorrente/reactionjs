@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 
 const BUNDLE_HEADER = `
-Reaction.js v0.2.4
+Reaction.js v0.2.5
 https://github.com/nestorrente/reactionjs
 
 Released under the MIT License.

@@ -18,9 +18,9 @@ export default function reactive<T>(object: T): T {
 
 }
 
-function doMakeReactiveChain(value: any) {
+function doReactiveCreationChain(value: any) {
 
-	if (isReactive(value) || isRef(value)) {
+	if (value == null || typeof value !== 'object' || isReactive(value) || isRef(value)) {
 		return value;
 	}
 
@@ -49,7 +49,7 @@ function createReactiveObject(object: Dictionary<any>): Dictionary<any> {
 		proxifyProperty(reactiveObject, propName, object);
 
 		const value: any = object[propName];
-		object[propName] = doMakeReactiveChain(value);
+		object[propName] = doReactiveCreationChain(value);
 
 	}
 
@@ -69,7 +69,7 @@ function createEmptyReactiveObject(): ReactivePlainObject {
 function createReactiveArray(value: any[]) {
 
 	for (let i = 0; i < value.length; ++i) {
-		value[i] = doMakeReactiveChain(value[i]);
+		value[i] = doReactiveCreationChain(value[i]);
 	}
 
 	return value;
@@ -95,7 +95,7 @@ export function proxifyProperty(reactiveObject: Dictionary<any>, propName: strin
 				return;
 			}
 
-			const newValue = doMakeReactiveChain(value);
+			const newValue = doReactiveCreationChain(value);
 
 			if (objectIsRef) {
 				previousValueOrRef.value = newValue;

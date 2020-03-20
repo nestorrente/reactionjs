@@ -1,10 +1,10 @@
 /*!
- * Reaction.js v0.2.4
+ * Reaction.js v0.2.5
  * https://github.com/nestorrente/reactionjs
  * 
  * Released under the MIT License.
  * 
- * Build date: 2020-03-20T15:29:38.492Z
+ * Build date: 2020-03-20T16:04:28.921Z
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -207,8 +207,8 @@ function reactive(object) {
     }
     return createReactiveObject(object);
 }
-function doMakeReactiveChain(value) {
-    if (isReactive(value) || isRef(value)) {
+function doReactiveCreationChain(value) {
+    if (value == null || typeof value !== 'object' || isReactive(value) || isRef(value)) {
         return value;
     }
     if (isPlainObject(value)) {
@@ -227,7 +227,7 @@ function createReactiveObject(object) {
         }
         proxifyProperty(reactiveObject, propName, object);
         var value = object[propName];
-        object[propName] = doMakeReactiveChain(value);
+        object[propName] = doReactiveCreationChain(value);
     }
     return reactiveObject;
 }
@@ -238,7 +238,7 @@ function createEmptyReactiveObject() {
 }
 function createReactiveArray(value) {
     for (var i = 0; i < value.length; ++i) {
-        value[i] = doMakeReactiveChain(value[i]);
+        value[i] = doReactiveCreationChain(value[i]);
     }
     return value;
 }
@@ -257,7 +257,7 @@ function proxifyProperty(reactiveObject, propName, originalObject) {
             if (previousValue === value) {
                 return;
             }
-            var newValue = doMakeReactiveChain(value);
+            var newValue = doReactiveCreationChain(value);
             if (objectIsRef) {
                 previousValueOrRef.value = newValue;
             }
