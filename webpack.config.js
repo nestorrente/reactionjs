@@ -36,7 +36,7 @@ const commonConfig = {
 	}
 };
 
-const standaloneConfig = {
+const standaloneWithoutDependenciesConfig = {
 	...commonConfig,
 	externals: {
 		'@nestorrente/event-bus': 'EventBus'
@@ -44,6 +44,16 @@ const standaloneConfig = {
 	output: {
 		...commonConfig.output,
 		filename: 'reaction.js',
+		library: 'Reaction',
+		libraryTarget: 'var'
+	}
+};
+
+const standaloneBundleConfig = {
+	...commonConfig,
+	output: {
+		...commonConfig.output,
+		filename: 'reaction.bundle.js',
 		library: 'Reaction',
 		libraryTarget: 'var'
 	}
@@ -62,6 +72,7 @@ const moduleConfig = {
 };
 
 module.exports = [
-	standaloneConfig,
+	standaloneWithoutDependenciesConfig,
+	standaloneBundleConfig,
 	moduleConfig
 ];
