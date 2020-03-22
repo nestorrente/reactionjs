@@ -6,10 +6,10 @@ import Watcher from '../util/Watcher';
 export default function computed<T>(callback: Supplier<T>): Readonly<Ref<T>> {
 
 	const watcherInstance = new Watcher(callback, {
-		onInvalidate(watcher: Watcher<T>): void {
+		onInvalidate(): void {
 			propertyEventBus.triggerInvalidateEvent(refObject, 'value');
 		},
-		onRecompute(watcher: Watcher<T>, newExecutionResult: T, previousExecutionResult?: T): void {
+		onRecompute(newExecutionResult: T, previousExecutionResult?: T): void {
 			if (newExecutionResult !== previousExecutionResult) {
 				propertyEventBus.triggerChangeEvent(refObject, 'value', newExecutionResult, previousExecutionResult);
 			}

@@ -1,8 +1,9 @@
 const webpack = require('webpack');
 const path = require('path');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 const BUNDLE_HEADER = `
-Reaction.js v0.2.5
+Reaction.js v0.3.0
 https://github.com/nestorrente/reactionjs
 
 Released under the MIT License.
@@ -25,6 +26,11 @@ const commonConfig = {
 	},
 	resolve: {
 		extensions: ['.tsx', '.ts', '.js'],
+		plugins: [
+			new TsconfigPathsPlugin({
+				configFile: 'tsconfig.json'
+			})
+		]
 	},
 	plugins: [
 		new webpack.BannerPlugin({

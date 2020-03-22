@@ -4,9 +4,9 @@ export interface WatcherDependency {
     object: any;
     propName: string;
 }
-export interface WatcherOptions<T> {
-    onInvalidate(watcher: Watcher<T>): void;
-    onRecompute(watcher: Watcher<T>, newExecutionResult: T, previousExecutionResult?: T): void;
+export interface WatcherEventListener<T> {
+    onInvalidate(): void;
+    onRecompute(newExecutionResult: T, previousExecutionResult?: T): void;
 }
 export declare type WatcherSource<T> = Ref<T> | Supplier<T>;
 export default class Watcher<T> {
@@ -15,9 +15,10 @@ export default class Watcher<T> {
     private executionResult;
     private dependencies;
     private invalidated;
-    constructor(source: WatcherSource<T>, options: WatcherOptions<T>);
+    constructor(source: WatcherSource<T>, options: WatcherEventListener<T>);
     private dependencyInvalidationListener;
     private isDependency;
+    stop(): void;
     private invalidate;
     private onInvalidate;
     getResult(): T;

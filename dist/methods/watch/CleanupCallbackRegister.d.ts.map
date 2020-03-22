@@ -1,0 +1,1 @@
+{"version":3,"file":"CleanupCallbackRegister.d.ts","sourceRoot":"","sources":["../../../src/methods/watch/CleanupCallbackRegister.ts"],"names":[],"mappings":"AAAA,OAAO,EAAC,QAAQ,EAAC,MAAM,kBAAkB,CAAC;AAE1C,MAAM,CAAC,OAAO,OAAO,uBAAuB;IAE3C,OAAO,CAAC,QAAQ,CAAyB;IAElC,gBAAgB,CAAC,QAAQ,EAAE,QAAQ;IAInC,OAAO;CAOd"}

@@ -1,6 +1,6 @@
 {
 	"name": "@nestorrente/reactionjs",
-	"version": "0.2.5",
+	"version": "0.3.0",
 	"description": "",
 	"main": "dist/reaction.bundle.js",
 	"module": "dist/reaction.esm.js",
@@ -32,6 +32,7 @@
 		"prettier": "^1.19.1",
 		"ts-jest": "^25.2.1",
 		"ts-loader": "^6.2.1",
+		"tsconfig-paths-webpack-plugin": "^3.2.0",
 		"tslint": "^6.0.0",
 		"tslint-config-prettier": "^1.18.0",
 		"typescript": "^3.8.3",

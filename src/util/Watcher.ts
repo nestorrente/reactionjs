@@ -9,11 +9,11 @@ export interface WatcherDependency {
 	propName: string;
 }
 
-export interface WatcherOptions<T> {
+export interface WatcherEventListener<T> {
 
-	onInvalidate(watcher: Watcher<T>): void;
+	onInvalidate(): void;
 
-	onRecompute(watcher: Watcher<T>, newExecutionResult: T, previousExecutionResult?: T): void;
+	onRecompute(newExecutionResult: T, previousExecutionResult?: T): void;
 
 }
 
@@ -22,14 +22,14 @@ export type WatcherSource<T> = Ref<T> | Supplier<T>;
 export default class Watcher<T> {
 
 	private readonly callback: Supplier<T>;
-	private readonly options: WatcherOptions<T>;
+	private readonly options: WatcherEventListener<T>;
 
 	private executionResult: T | undefined;
 
 	private dependencies: WatcherDependency[];
 	private invalidated: boolean;
 
-	constructor(source: WatcherSource<T>, options: WatcherOptions<T>) {
+	constructor(source: WatcherSource<T>, options: WatcherEventListener<T>) {
 
 		this.callback = convertSourceToCallback(source);
 		this.options = options;
@@ -37,7 +37,9 @@ export default class Watcher<T> {
 		this.dependencies = [];
 		this.invalidated = true;
 
-		propertyEventBus.addInvalidateListener(this.dependencyInvalidationListener.bind(this));
+		this.dependencyInvalidationListener = this.dependencyInvalidationListener.bind(this);
+
+		propertyEventBus.addInvalidateListener(this.dependencyInvalidationListener);
 
 	}
 
@@ -53,6 +55,11 @@ export default class Watcher<T> {
 		});
 	}
 
+	public stop(): void {
+		propertyEventBus.removeInvalidateListener(this.dependencyInvalidationListener);
+		this.invalidate();
+	}
+
 	private invalidate() {
 		if (!this.invalidated) {
 			this.dependencies = [];
@@ -63,7 +70,7 @@ export default class Watcher<T> {
 
 	private onInvalidate(): void {
 		const {onInvalidate} = this.options;
-		onInvalidate(this);
+		onInvalidate();
 	}
 
 	public getResult(): T {
@@ -90,7 +97,7 @@ export default class Watcher<T> {
 
 	private onRecompute(newExecutionResult: T, previousExecutionResult?: T): void {
 		const {onRecompute} = this.options;
-		onRecompute(this, newExecutionResult, previousExecutionResult);
+		onRecompute(newExecutionResult, previousExecutionResult);
 	}
 
 }

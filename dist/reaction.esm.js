@@ -1,10 +1,10 @@
 /*!
- * Reaction.js v0.2.5
+ * Reaction.js v0.3.0
  * https://github.com/nestorrente/reactionjs
  * 
  * Released under the MIT License.
  * 
- * Build date: 2020-03-20T16:20:22.884Z
+ * Build date: 2020-03-22T15:09:08.977Z
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -321,7 +321,8 @@ var Watcher_Watcher = /** @class */ (function () {
         this.options = options;
         this.dependencies = [];
         this.invalidated = true;
-        property_event_bus.addInvalidateListener(this.dependencyInvalidationListener.bind(this));
+        this.dependencyInvalidationListener = this.dependencyInvalidationListener.bind(this);
+        property_event_bus.addInvalidateListener(this.dependencyInvalidationListener);
     }
     Watcher.prototype.dependencyInvalidationListener = function (object, propName) {
         if (!this.invalidated && this.isDependency(object, propName)) {
@@ -333,6 +334,10 @@ var Watcher_Watcher = /** @class */ (function () {
             return dependency.object === object && dependency.propName === propName;
         });
     };
+    Watcher.prototype.stop = function () {
+        property_event_bus.removeInvalidateListener(this.dependencyInvalidationListener);
+        this.invalidate();
+    };
     Watcher.prototype.invalidate = function () {
         if (!this.invalidated) {
             this.dependencies = [];
@@ -342,7 +347,7 @@ var Watcher_Watcher = /** @class */ (function () {
     };
     Watcher.prototype.onInvalidate = function () {
         var onInvalidate = this.options.onInvalidate;
-        onInvalidate(this);
+        onInvalidate();
     };
     Watcher.prototype.getResult = function () {
         if (this.invalidated) {
@@ -360,7 +365,7 @@ var Watcher_Watcher = /** @class */ (function () {
     };
     Watcher.prototype.onRecompute = function (newExecutionResult, previousExecutionResult) {
         var onRecompute = this.options.onRecompute;
-        onRecompute(this, newExecutionResult, previousExecutionResult);
+        onRecompute(newExecutionResult, previousExecutionResult);
     };
     return Watcher;
 }());
@@ -378,10 +383,10 @@ function convertSourceToCallback(source) {
 
 function computed(callback) {
     var watcherInstance = new util_Watcher(callback, {
-        onInvalidate: function (watcher) {
+        onInvalidate: function () {
             property_event_bus.triggerInvalidateEvent(refObject, 'value');
         },
-        onRecompute: function (watcher, newExecutionResult, previousExecutionResult) {
+        onRecompute: function (newExecutionResult, previousExecutionResult) {
             if (newExecutionResult !== previousExecutionResult) {
                 property_event_bus.triggerChangeEvent(refObject, 'value', newExecutionResult, previousExecutionResult);
             }
@@ -407,49 +412,177 @@ function createReadonlyRef(getter) {
     return refObject;
 }
 
+// CONCATENATED MODULE: ./src/methods/watch/CleanupCallbackRegister.ts
+var CleanupCallbackRegister = /** @class */ (function () {
+    function CleanupCallbackRegister() {
+        this.callback = null;
+    }
+    CleanupCallbackRegister.prototype.registerCallback = function (callback) {
+        this.callback = callback;
+    };
+    CleanupCallbackRegister.prototype.execute = function () {
+        if (this.callback) {
+            this.callback();
+            this.callback = null;
+        }
+    };
+    return CleanupCallbackRegister;
+}());
+/* harmony default export */ var watch_CleanupCallbackRegister = (CleanupCallbackRegister);
+
 // CONCATENATED MODULE: ./src/methods/nextTick.ts
 function nextTick(callback) {
     setTimeout(callback, 0);
 }
 
-// CONCATENATED MODULE: ./src/methods/watch.ts
+// CONCATENATED MODULE: ./src/methods/watch/AbstractWatch.ts
+
+
+
+var AbstractWatch_AbstractWatch = /** @class */ (function () {
+    function AbstractWatch() {
+        this.cleanupCallbackRegister = new watch_CleanupCallbackRegister();
+        this.invalidated = false;
+        this.stopped = false;
+    }
+    AbstractWatch.prototype.init = function () {
+        this.watcherInstance = this.createWatcher();
+        this.afterWatcherCreation(this.watcherInstance);
+    };
+    AbstractWatch.prototype.createWatcher = function () {
+        var _this = this;
+        return new util_Watcher(this.getWatcherSource(), {
+            onInvalidate: function () {
+                if (_this.invalidated || _this.stopped) {
+                    return;
+                }
+                nextTick(function () {
+                    _this.onNextTickAfterWatcherInvalidate(_this.watcherInstance);
+                });
+                _this.invalidated = true;
+            },
+            onRecompute: function () {
+                _this.invalidated = false;
+            }
+        });
+    };
+    AbstractWatch.prototype.stop = function () {
+        if (!this.stopped) {
+            this.stopped = true;
+            this.cleanupCallbackRegister.execute();
+            this.watcherInstance.stop();
+        }
+    };
+    return AbstractWatch;
+}());
+/* harmony default export */ var watch_AbstractWatch = (AbstractWatch_AbstractWatch);
+
+// CONCATENATED MODULE: ./src/methods/watch/WatchSimpleEffect.ts
+var __extends = (undefined && undefined.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+
+var WatchSimpleEffect = /** @class */ (function (_super) {
+    __extends(WatchSimpleEffect, _super);
+    function WatchSimpleEffect(callback) {
+        var _this = _super.call(this) || this;
+        _this.callback = callback;
+        return _this;
+    }
+    WatchSimpleEffect.prototype.getWatcherSource = function () {
+        var _this = this;
+        return function () { return _this.callback(function (cleanup) {
+            _this.cleanupCallbackRegister.registerCallback(cleanup);
+        }); };
+    };
+    WatchSimpleEffect.prototype.onNextTickAfterWatcherInvalidate = function (watcher) {
+        this.cleanupCallbackRegister.execute();
+        watcher.getResult();
+    };
+    WatchSimpleEffect.prototype.afterWatcherCreation = function (watcher) {
+        watcher.getResult();
+    };
+    return WatchSimpleEffect;
+}(watch_AbstractWatch));
+/* harmony default export */ var watch_WatchSimpleEffect = (WatchSimpleEffect);
+
+// CONCATENATED MODULE: ./src/methods/watch/WatchSource.ts
+var WatchSource_extends = (undefined && undefined.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+
+var WatchSource = /** @class */ (function (_super) {
+    WatchSource_extends(WatchSource, _super);
+    function WatchSource(source, callback) {
+        var _this = _super.call(this) || this;
+        _this.source = source;
+        _this.callback = callback;
+        return _this;
+    }
+    WatchSource.prototype.getWatcherSource = function () {
+        return this.source;
+    };
+    WatchSource.prototype.onNextTickAfterWatcherInvalidate = function (watcher) {
+        var _this = this;
+        var newResult = watcher.getResult();
+        if (this.lastResult === newResult) {
+            this.invalidated = false;
+            return;
+        }
+        this.cleanupCallbackRegister.execute();
+        this.callback(newResult, this.lastResult, function (cleanup) {
+            _this.cleanupCallbackRegister.registerCallback(cleanup);
+        });
+        this.lastResult = newResult;
+    };
+    WatchSource.prototype.afterWatcherCreation = function (watcher) {
+        var _this = this;
+        var newResult = watcher.getResult();
+        this.callback(newResult, this.lastResult, function (cleanup) {
+            _this.cleanupCallbackRegister.registerCallback(cleanup);
+        });
+        this.lastResult = newResult;
+    };
+    return WatchSource;
+}(watch_AbstractWatch));
+/* harmony default export */ var watch_WatchSource = (WatchSource);
+
+// CONCATENATED MODULE: ./src/methods/watch/index.ts
 
 
 function watch(source, callback) {
-    var invalidated = false;
-    var watcherInstance = new util_Watcher(source, {
-        onInvalidate: function (watcher) {
-            if (!invalidated) {
-                // Enqueue recomputing
-                nextTick(function () {
-                    var result = watcher.getResult();
-                    if (callback != null) {
-                        callback(result);
-                    }
-                });
-                invalidated = true;
-            }
-        },
-        onRecompute: function (watcher, newExecutionResult, previousExecutionResult) {
-            invalidated = false;
-        }
-    });
-    watcherInstance.getResult();
+    var watchObject = createWatchObject(source, callback);
+    watchObject.init();
+    return function () { return watchObject.stop(); };
 }
-// FIXME adapt in order to give a similar (but more limited) flexibility to Vue's Composition API
-// type CleanupRegistrator = (invalidate: Runnable) => void;
-// type SimpleEffect = (onCleanup: CleanupRegistrator) => void;
-// type StopHandle = () => void;
-// type WatcherSource<T> = Ref<T> | Supplier<T>;
-// type WatcherCallBack<T> = (newVal: T, oldVal: T, onCleanup: CleanupRegistrator) => void;
-//
-// function watch2(source: SimpleEffect): StopHandle;
-// function watch2<T>(source: WatcherSource<T>, callback: WatcherCallBack<T>): StopHandle;
-// function watch2<T>(): StopHandle {
-// 	return () => {
-// 		// stop watching
-// 	};
-// }
+function createWatchObject(source, callback) {
+    if (callback === undefined) {
+        return new watch_WatchSimpleEffect(source);
+    }
+    else {
+        return new watch_WatchSource(source, callback);
+    }
+}
 
 // CONCATENATED MODULE: ./src/methods/index.ts
 
