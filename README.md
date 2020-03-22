@@ -73,8 +73,6 @@ The script will create a global  `Reaction` object, which contains all the expor
 ### Using `import`
 
 ```javascript
-import {reactive} from 'reactionjs';
-
 const pokemon = reactive({
     name: 'Pikachu',
     level: 5
@@ -95,8 +93,6 @@ const pokemon = Reaction.reactive({
 You can also use ES6 _destructuring assignment_ in order to imitate module imports:
 
 ```javascript
-const {reactive} = Reaction;
-
 const pokemon = reactive({
     name: 'Pikachu',
     level: 5
@@ -152,21 +148,23 @@ pokemon.level += 1;
 console.log(pokemon.level); // 6
 ```
 
-You can also use a reference as the value of a property. When getting the value of a reactive object's property, references are automatically unwrapped (as Vue.js does):
+It's also possible to use a reference as the value of a property. When getting the value of a reactive object's property, references are automatically unwrapped (as Vue.js does):
 
 ```javascript
-import {ref, reactive} from 'reactionjs';
-
 const name = ref('Pikachu');
 
 const pokemon = reactive({
-    name,
-    level: 5,
-    // ... other properties...
+    name, // <-- the reference
+    level: 5
 });
 
+// Access using the reference
 console.log(name.value); // "Pikachu"
-console.log(pokemon.name); // "Pikachu", no '.value' is needed
+
+// Access using a reactive object (no '.value' is needed)
+console.log(pokemon.name); // "Pikachu"
+
+// Modifications made to the reference affect the object's property, and vice versa
 
 name.value = 'Charizard';
 console.log(pokemon.name); // "Charizard"
@@ -180,8 +178,6 @@ console.log(name.value); // "Mewtwo"
 Calling `reactive()` returns a new object that is observed. Changes made to this object will be reflected on the original one:
 
 ```javascript
-import {reactive} from 'reactionjs';
-
 const originalObject = {
     name: 'Pikachu',
     // ... other properties...
@@ -241,10 +237,10 @@ As writing code like that can be a little frustrating, we recommend you to use t
 ### computed()
 
 ```typescript
-computed<T>(callback: () => T): Ref<T>
+computed<T>(callback: () => T): Readonly<Ref<T>>
 ```
 
-Creates a read-only reference whose value is the result of invoking the `callback` function. It's value is automatically updated when any of its dependencies change:
+This method creates a read-only reference whose value is the result of invoking the `callback` function. It's value is automatically updated when any of its dependencies change:
 
 ```javascript
 const pokemon = reactive({
@@ -286,8 +282,19 @@ upperCaseName.value = 'MEWTWO';
 ### watch()
 
 ```typescript
-watch(callback: () => void): void
+watch(callback: SimpleEffect): StopHandle;
+watch<T>(source: Ref<T> | () => T, callback: WatcherCallBack<T>): StopHandle;
 ```
+Related types:
+
+```typescript
+type SimpleEffect = (onCleanup: CleanupRegistrator) => void;
+type WatcherCallBack<T> = (newVal: T, oldVal: T | undefined, onCleanup: CleanupRegistrator) => void;
+type StopHandle = () => void;
+type CleanupRegistrator = (invalidate: Runnable) => void;
+```
+
+**_WARNING: this section is under construction_**
 
 Allows you to define a watcher function that will be executed every time one of it's dependencies changes. The watcher is executed immediately after being created, so it can know what its dependencies are:
 
