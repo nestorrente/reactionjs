@@ -1,10 +1,10 @@
 /*!
- * Reaction.js v0.3.0
+ * Reaction.js v0.3.1
  * https://github.com/nestorrente/reactionjs
  * 
  * Released under the MIT License.
  * 
- * Build date: 2020-03-22T15:09:08.977Z
+ * Build date: 2020-03-25T17:42:11.000Z
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -225,7 +225,7 @@ function createReactiveObject(object) {
         if (!object.hasOwnProperty(propName)) {
             continue;
         }
-        proxifyProperty(reactiveObject, propName, object);
+        defineReactiveProperty(reactiveObject, propName, object);
         var value = object[propName];
         object[propName] = doReactiveCreationChain(value);
     }
@@ -242,16 +242,16 @@ function createReactiveArray(value) {
     }
     return value;
 }
-function proxifyProperty(reactiveObject, propName, originalObject) {
+function defineReactiveProperty(reactiveObject, propName, dataObject) {
     Object.defineProperty(reactiveObject, propName, {
         enumerable: true,
         get: function () {
-            var value = originalObject[propName];
+            var value = dataObject[propName];
             property_event_bus.triggerReadEvent(reactiveObject, propName, value);
             return isRef(value) ? value.value : value;
         },
         set: function (value) {
-            var previousValueOrRef = originalObject[propName];
+            var previousValueOrRef = dataObject[propName];
             var objectIsRef = isRef(previousValueOrRef);
             var previousValue = objectIsRef ? previousValueOrRef.value : previousValueOrRef;
             if (previousValue === value) {
@@ -262,7 +262,7 @@ function proxifyProperty(reactiveObject, propName, originalObject) {
                 previousValueOrRef.value = newValue;
             }
             else {
-                originalObject[propName] = newValue;
+                dataObject[propName] = newValue;
             }
             property_event_bus.triggerInvalidateEvent(reactiveObject, propName);
             property_event_bus.triggerChangeEvent(reactiveObject, propName, newValue, previousValue);
@@ -274,6 +274,9 @@ function proxifyProperty(reactiveObject, propName, originalObject) {
 
 
 function ref(value) {
+    if (isRef(value)) {
+        return value;
+    }
     var refObject = reactive({
         value: value
     });
