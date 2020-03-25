@@ -3,7 +3,7 @@ const path = require('path');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 const BUNDLE_HEADER = `
-Reaction.js v0.3.0
+Reaction.js v${process.env.npm_package_version}
 https://github.com/nestorrente/reactionjs
 
 Released under the MIT License.

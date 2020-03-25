@@ -1,20 +1,20 @@
 import {isPlainObject} from '../util/is-plain-object';
 import propertyEventBus from '../util/property-event-bus';
-import {isRef} from '../util/Ref';
+import {isRef, UnwrapRef} from '../util/Ref';
 import {Dictionary} from '../util/types';
 import {isReactive, REACTIVE_ID_PROP_NAME, ReactivePlainObject} from '../util/ReactiveObject';
 
-export default function reactive<T>(object: T): T {
+export default function reactive<T>(object: T): UnwrapRef<T> {
 
 	if (isReactive(object)) {
-		return object;
+		return object as UnwrapRef<T>;
 	}
 
 	if (!isPlainObject(object)) {
 		throw new Error('Cannot observe value:' + object);
 	}
 
-	return createReactiveObject(object) as T;
+	return createReactiveObject(object) as UnwrapRef<T>;
 
 }
 
@@ -46,7 +46,7 @@ function createReactiveObject(object: Dictionary<any>): Dictionary<any> {
 			continue;
 		}
 
-		proxifyProperty(reactiveObject, propName, object);
+		defineReactiveProperty(reactiveObject, propName, object);
 
 		const value: any = object[propName];
 		object[propName] = doReactiveCreationChain(value);
@@ -76,17 +76,21 @@ function createReactiveArray(value: any[]) {
 
 }
 
-export function proxifyProperty(reactiveObject: Dictionary<any>, propName: string, originalObject: Dictionary<any>) {
+export function defineReactiveProperty(reactiveObject: Dictionary<any>, propName: string, dataObject: Dictionary<any>) {
 	Object.defineProperty(reactiveObject, propName, {
 		enumerable: true,
 		get(): any {
-			const value = originalObject[propName];
+
+			const value = dataObject[propName];
+
 			propertyEventBus.triggerReadEvent(reactiveObject, propName, value);
+
 			return isRef(value) ? value.value : value;
+
 		},
 		set(value: any): void {
 
-			const previousValueOrRef = originalObject[propName];
+			const previousValueOrRef = dataObject[propName];
 			const objectIsRef = isRef(previousValueOrRef);
 
 			const previousValue = objectIsRef ? previousValueOrRef.value : previousValueOrRef;
@@ -100,7 +104,7 @@ export function proxifyProperty(reactiveObject: Dictionary<any>, propName: strin
 			if (objectIsRef) {
 				previousValueOrRef.value = newValue;
 			} else {
-				originalObject[propName] = newValue;
+				dataObject[propName] = newValue;
 			}
 
 			propertyEventBus.triggerInvalidateEvent(reactiveObject, propName);
