@@ -1,3 +1,4 @@
+
 # Reaction.js
 
 Reactive objects, computed properties and watchers inspired by Vue.js [Composition API](https://github.com/vuejs/composition-api-rfc).
@@ -13,11 +14,14 @@ We are working hard to bring you a production-ready library as soon as possible 
     + **[Using NPM](#using-npm)**
     + **[Using `<script>` tag](#using-script-tag)**
 + **[Usage](#usage)**
-    + **[ES6 module (import)](#es6-module-import)**
-    + **[Reaction object (browser)](#reaction-object-browser)**
+    + **[Using `import`](#using-import)**
+    + **[Using `Reaction` object](#using-reaction-object)**
 + **[Method reference](#method-reference)**
     + **[ref()](#ref)**
     + **[reactive()](#reactive)**
+        + **[References inside reactive objects](#references-inside-reactive-objects)**
+        + **[Reactivity limitations](#reactivity-limitations)**
+        + **[Caveats](#caveats)**
     + **[computed()](#computed)**
     + **[watch()](#watch)**
     + **[nextTick()](#nexttick)**
@@ -73,9 +77,14 @@ The script will create a global  `Reaction` object, which contains all the expor
 ### Using `import`
 
 ```javascript
+import {ref, reactive, computed, watch, nextTick} from '@nestorrente/reactivejs';
+
+const pokemonLevel = ref(5);
+
 const pokemon = reactive({
     name: 'Pikachu',
-    level: 5
+    // It's possible to use references as property values
+    level: pokemonLevel
 });
 ```
 
@@ -93,6 +102,8 @@ const pokemon = Reaction.reactive({
 You can also use ES6 _destructuring assignment_ in order to imitate module imports:
 
 ```javascript
+const {ref, reactive, computed, watch, nextTick} = Reaction;
+
 const pokemon = reactive({
     name: 'Pikachu',
     level: 5
@@ -104,7 +115,7 @@ const pokemon = reactive({
 ### ref()
 
 ```typescript
-ref<T>(value: T): Ref<T>
+function ref<T>(value: T): Ref<T>
 ```
 
 Creates a reactive object representing a single value:
@@ -120,7 +131,7 @@ console.log(name.value); // "Charizad"
 ### reactive()
 
 ```typescript
-reactive<T>(object: T): T
+function reactive<T>(object: T): T
 ```
 
 Creates a reactive object with multiple properties:
@@ -148,6 +159,8 @@ pokemon.level += 1;
 console.log(pokemon.level); // 6
 ```
 
+#### References inside reactive objects
+
 It's also possible to use a reference as the value of a property. When getting the value of a reactive object's property, references are automatically unwrapped (as Vue.js does):
 
 ```javascript
@@ -173,9 +186,89 @@ pokemon.name = 'Mewtwo';
 console.log(name.value); // "Mewtwo"
 ```
 
-**_Note:_**
+#### Reactivity limitations
 
-Calling `reactive()` returns a new object that is observed. Changes made to this object will be reflected on the original one:
+Reaction.js can only observe changes in JavaScript plain objects. This means it can't observe changes made to complex types like [Date](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/Date), [Array](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/Array), [Map](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/Map), [Set](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/Set), [WeakMap](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/WeakMap) or [WeakSet](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/WeakSet). However, you can use an immutable approach in order to achieve reactivity. We strongly recommend you to use the great [Immutable.js](https://github.com/immutable-js/immutable-js) library for this purpouse :slightly_smiling_face:
+
+For those who doesn't want to add another library to their projects, here we show you some _vanilla JS_ immutability examples for Date and Array objects:
+
+<ins>Date</ins>
+
+Example data object:
+
+```javascript
+const pokemon = reactive({
+    name: 'Pikachu',
+    dateOfCapture: new Date(2020, 0, 1)
+});
+```
+
+Don't do this 👎
+
+```javascript
+pokemon.dateOfCapture.setMonth(2);
+```
+
+Do this instead 👍
+
+```javascript
+// Clone the Date object
+const newDateOfCapture = new Date(pokemon.dateOfCapture.getTime());
+
+// Modify the new object
+newDateOfCapture.setMonth(2);
+
+// Set the new object as the value of the property
+pokemon.dateOfCapture = newDateOfCapture;
+```
+
+<ins>Array</ins>
+
+Example data object:
+
+```javascript
+const pokemon = reactive({
+    name: 'Pikachu',
+    moves: [
+        'Thunder Shock',
+        'Growl'
+    ]
+});
+```
+
+Don't do this 👎
+
+```javascript
+// Append one element at the end
+pokemon.moves.push('Tail Whip');
+
+// Modify one element by index
+pokemon.moves[index] = 'Thunder';
+
+// Remove the last element
+pokemon.moves.pop();
+```
+
+Do this instead 👍
+
+```javascript
+// Append one element at the end
+pokemon.moves = [...pokemon.moves, 'Tail Whip'];
+
+// Modify one element by index
+pokemon.moves = [
+    ...pokemon.moves.slice(0, index),
+    'Thunder',
+    ...pokemon.moves.slice(index+1)
+];
+
+// Remove the last element
+pokemon.moves = pokemon.moves.slice(0, -1);
+```
+
+#### Caveats
+
+Calling `reactive()` returns a new object that is observed. Changes made on this object will be reflected on the original one:
 
 ```javascript
 const originalObject = {
@@ -189,7 +282,7 @@ reactiveObject.name = 'Charizard';
 console.log(originalObject.name); // "Charizard"
 ```
 
-However, changes made to the original object will not tracked by the system. The recommendation is to not store the original object and always use the one returned by `reactive()`:
+However, changes made directly on the original object will not tracked by the system &ndash; this implies that computed properties as watchers will not work as expected. The recommendation is to not store the original object and always use the one returned by `reactive()`:
 
 ```javascript
 // Don't do this 👎
@@ -204,40 +297,10 @@ const pokemon = reactive({
 });
 ```
 
-**Limitations:**
-
-Changes in arrays are not observed. This means the library cannot react to the following operations:
-
-```javascript
-// Append one element at the end
-pokemon.moves.push('Tail Whip');
-
-// Modify one element by index
-pokemon.moves[0] = 'Thunder';
-
-// Remove the last element
-pokemon.moves.pop();
-```
-
-Instead, you have to use immutable arrays and create a new one every time you want to change it:
-
-```javascript
-// Append one element at the end
-pokemon.moves = [...pokemon.moves, 'Tail Whip'];
-
-// Modify one element by index
-pokemon.moves = ['Thunder', ...pokemon.moves.slice(1)];
-
-// Remove the last element
-pokemon.moves = pokemon.moves.slice(0, -1);
-```
-
-As writing code like that can be a little frustrating, we recommend you to use the great [Immutable.js](https://github.com/immutable-js/immutable-js) library for this purpouse :slightly_smiling_face:
-
 ### computed()
 
 ```typescript
-computed<T>(callback: () => T): Readonly<Ref<T>>
+function computed<T>(callback: () => T): Readonly<Ref<T>>
 ```
 
 This method creates a read-only reference whose value is the result of invoking the `callback` function. It's value is automatically updated when any of its dependencies change:
@@ -282,8 +345,9 @@ upperCaseName.value = 'MEWTWO';
 ### watch()
 
 ```typescript
-watch(callback: SimpleEffect): StopHandle;
-watch<T>(source: Ref<T> | () => T, callback: WatcherCallBack<T>): StopHandle;
+function watch(callback: SimpleEffect): StopHandle;
+function watch<T>(source: Ref<T>, callback: WatcherCallBack<T>): StopHandle;
+function watch<T>(source: () => T, callback: WatcherCallBack<T>): StopHandle;
 ```
 Related types:
 
@@ -294,9 +358,17 @@ type StopHandle = () => void;
 type CleanupRegistrator = (invalidate: Runnable) => void;
 ```
 
-**_WARNING: this section is under construction_**
+#### Simple watch callback
 
-Allows you to define a watcher function that will be executed every time one of it's dependencies changes. The watcher is executed immediately after being created, so it can know what its dependencies are:
+```typescript
+function watch(callback: SimpleEffect): StopHandle;
+```
+
+:construction: _This section is under construction and is subject to change_ :construction:
+
+Allows you to define a watcher function that will be executed every time one of it's dependencies changes.
+
+Watchers are executed for the first time immediately after being created in order to track its dependencies:
 
 ```javascript
 const pokemon = reactive({
@@ -336,10 +408,26 @@ Console output will be:
 
 You can force intermediate executions by using the [`nextTick()`](#nexttick) function.
 
+#### Using a reference as source
+
+```typescript
+function watch<T>(source: Ref<T>, callback: WatcherCallBack<T>): StopHandle;
+```
+
+:construction: _This section is under construction_ :construction:
+
+#### Using custom callback as source
+
+```typescript
+function watch<T>(source: () => T, callback: WatcherCallBack<T>): StopHandle;
+```
+
+:construction: _This section is under construction_ :construction:
+
 ### nextTick()
 
 ```typescript
-nextTick(callback: () => void): void
+function nextTick(callback: () => void): void
 ```
 
 Allows you to execute a portion of code in the next event cycle of the execution environment. This is actually the same as `setTimeout(callback, 0)`.

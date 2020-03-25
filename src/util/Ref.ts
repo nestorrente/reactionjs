@@ -9,6 +9,8 @@ export function isRef(value: any): value is Ref<any> {
 	return value != null && typeof value === 'object' && !!value[REF_PROP_NAME];
 }
 
+// Types extracted from Vue's Composition API source: https://github.com/vuejs/composition-api/blob/master/src/reactivity/ref.ts
+
 // tslint:disable-next-line:ban-types
 type BailTypes = Function | Map<any, any> | Set<any> | WeakMap<any, any> | WeakSet<any>;
 

@@ -1,8 +1,10 @@
 const webpack = require('webpack');
 const path = require('path');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 const BUNDLE_HEADER = `
+@license
 Reaction.js v${process.env.npm_package_version}
 https://github.com/nestorrente/reactionjs
 
@@ -10,6 +12,9 @@ Released under the MIT License.
 
 Build date: ${new Date().toISOString()}
 `.trim();
+
+const LICENSE_COMMENT_REGEX = /@license/i;
+const REACTIONJS_COMMENT_REGEX = /\bReaction\.js\b/;
 
 const commonConfig = {
 	entry: './src/index.ts',
@@ -37,6 +42,20 @@ const commonConfig = {
 			banner: BUNDLE_HEADER
 		})
 	],
+	optimization: {
+		minimizer: [
+			new UglifyJsPlugin({
+				uglifyOptions: {
+					output: {
+						comments(node, comment) {
+							const commentContents = comment.value;
+							return LICENSE_COMMENT_REGEX.test(commentContents) && REACTIONJS_COMMENT_REGEX.test(commentContents);
+						},
+					},
+				}
+			})
+		]
+	},
 	output: {
 		path: path.resolve(__dirname, 'dist'),
 	}
@@ -67,9 +86,6 @@ const standaloneBundleConfig = {
 
 const moduleConfig = {
 	...commonConfig,
-	optimization: {
-		minimize: false
-	},
 	output: {
 		...commonConfig.output,
 		filename: 'reaction.esm.js',
