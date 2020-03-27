@@ -22,6 +22,7 @@ export default class WatchSource<T> extends AbstractWatch<T, T> {
 
 		const newResult = watcher.getResult();
 
+		// FIXME check what is the Vue behaviour when this result is an array of dependencies, and do the same here
 		if (this.lastResult === newResult) {
 			this.invalidated = false;
 			return;
