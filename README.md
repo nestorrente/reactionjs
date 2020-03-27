@@ -1,3 +1,6 @@
+
+
+
 # Reaction.js
 
 Reactive objects, computed properties and watchers inspired by Vue.js [Composition API](https://github.com/vuejs/composition-api-rfc).
@@ -10,47 +13,47 @@ We are working hard to bring you a production-ready library as soon as possible 
 
 + **[Why Reaction.js?](#why-reactionjs)**
 + **[Installation](#installation)**
-    + **[Using NPM](#using-npm)**
-    + **[Using `<script>` tag](#using-script-tag)**
+ + **[Using NPM](#using-npm)**
+ + **[Using `<script>` tag](#using-script-tag)**
 + **[Usage](#usage)**
-    + **[Using `import`](#using-import)**
-    + **[Using `Reaction` object](#using-reaction-object)**
+ + **[Using `import`](#using-import)**
+ + **[Using `Reaction` object](#using-reaction-object)**
 + **[Method reference](#method-reference)**
-    + **[ref()](#ref)**
-    + **[reactive()](#reactive)**
-        + **[References inside reactive objects](#references-inside-reactive-objects)**
-        + **[Reactivity limitations](#reactivity-limitations)**
-        + **[Caveats](#caveats)**
-    + **[computed()](#computed)**
-    + **[watch()](#watch)**
-        + **[Watcher with implicit dependencies](#watcher-with-implicit-dependencies)**
-        + **[Explicit dependency declaration](#explicit-dependency-declaration)**
-    + **[nextTick()](#nexttick)**
+ + **[ref()](#ref)**
+ + **[reactive()](#reactive)**
+ + **[References inside reactive objects](#references-inside-reactive-objects)**
+ + **[Reactivity limitations](#reactivity-limitations)**
+ + **[Caveats](#caveats)**
+ + **[computed()](#computed)**
+ + **[watch()](#watch)**
+ + **[Watcher with implicit dependencies](#watcher-with-implicit-dependencies)**
+ + **[Explicit dependency declaration](#explicit-dependency-declaration)**
+ + **[nextTick()](#nexttick)**
 
 ## Why Reaction.js?
 
-The reason behind Reaction.js is to provide a way to use **reactive models**,
-computed properties and watchers in **non-Vue/React/Angular** environments.
+The reason behind Reaction.js is to provide a way to use **reactive models**, computed properties and watchers in **non-Vue/React/Angular** environments.
 
-The scope of this library **has nothing to do with UI**.
-It doesn't provide a way to bind your model to de UI.
-However, you can achieve some kind of binding using watchers (see [watch()](#watch) method)
-and [event listeners](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener). 
+The scope of this library **has nothing to do with UI**. It doesn't provide a way to bind your model to de UI. However, you can achieve some kind of binding using watchers (see [watch()](#watch) method)
+and [event listeners](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener).
 
 ## Installation
 
 ### Using NPM
 
-Install the latest stable version...
+Install the latest stable version:
 
 ```bash
 npm install --save @nestorrente/reactionjs
 ```
 
-... then you can import Reaction.js methods in your modules:
+Then you can import _Reaction.js_ methods in your modules:
 
 ```javascript
-import {ref, reactive, computed, watch} from '@nestorrente/reactionjs';
+import {ref, reactive, computed, watch, nextTick} from '@nestorrente/reactionjs';
+
+// ...or import all within an object
+import * as Reaction from '@nestorrente/reactionjs';
 ```
 
 ### Using `<script>` tag
@@ -80,13 +83,14 @@ The script will create a global  `Reaction` object, which contains all the expor
 ```javascript
 import {ref, reactive, computed, watch, nextTick} from '@nestorrente/reactivejs';
 
-const pokemonLevel = ref(5);
+const trainersName = ref('Ash');
 
 const pokemon = reactive({
     name: 'Pikachu',
-    // It's possible to use references as property values
-    level: pokemonLevel
+    level: 5
 });
+
+const nextLevel = computed(() => pokemon.level + 1);
 ```
 
 ### Using `Reaction` object
@@ -94,10 +98,14 @@ const pokemon = reactive({
 You can invoke any method just by doing `Reaction.methodName()`:
 
 ```javascript
+const trainersName = Reaction.ref('Ash');
+
 const pokemon = Reaction.reactive({
     name: 'Pikachu',
     level: 5
 });
+
+const nextLevel = Reaction.computed(() => pokemon.level + 1);
 ```
 
 You can also use ES6 _destructuring assignment_ in order to imitate module imports:
@@ -105,10 +113,14 @@ You can also use ES6 _destructuring assignment_ in order to imitate module impor
 ```javascript
 const {ref, reactive, computed, watch, nextTick} = Reaction;
 
+const trainersName = ref('Ash');
+
 const pokemon = reactive({
     name: 'Pikachu',
     level: 5
 });
+
+const nextLevel = computed(() => pokemon.level + 1);
 ```
 
 ## Method reference
@@ -123,10 +135,10 @@ Creates a reactive object representing a single value:
 
 ```javascript
 const name = ref('Pikachu');
-console.log(name.value); // "Pikachu"
+console.log(name.value); // prints "Pikachu"
 
 name.value = 'Charizard';
-console.log(name.value); // "Charizad"
+console.log(name.value); // prints "Charizad"
 ```
 
 ### reactive()
@@ -153,11 +165,11 @@ const pokemon = reactive({
     ]
 });
 
-console.log(pokemon.level); // 5
-console.log(pokemon.stats.attack); // 13
+console.log(pokemon.level); // prints 5
+console.log(pokemon.stats.attack); // prints 13
 
 pokemon.level += 1;
-console.log(pokemon.level); // 6
+console.log(pokemon.level); // prints 6
 ```
 
 #### References inside reactive objects
@@ -173,23 +185,23 @@ const pokemon = reactive({
 });
 
 // Access using the reference
-console.log(name.value); // "Pikachu"
+console.log(name.value); // prints "Pikachu"
 
-// Access using a reactive object (no '.value' is needed)
-console.log(pokemon.name); // "Pikachu"
+// Access through the reactive object (no '.value' is needed)
+console.log(pokemon.name); // prints "Pikachu"
 
 // Modifications made to the reference affect the object's property, and vice versa
 
 name.value = 'Charizard';
-console.log(pokemon.name); // "Charizard"
+console.log(pokemon.name); // prints "Charizard"
 
 pokemon.name = 'Mewtwo';
-console.log(name.value); // "Mewtwo"
+console.log(name.value); // prints "Mewtwo"
 ```
 
 #### Reactivity limitations
 
-Reaction.js can only observe changes in JavaScript plain objects. This means it can't observe changes made to complex types like [Date](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/Date), [Array](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/Array), [Map](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/Map), [Set](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/Set), [WeakMap](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/WeakMap) or [WeakSet](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/WeakSet). However, you can use an immutable approach in order to achieve reactivity. We strongly recommend you to use the great [Immutable.js](https://github.com/immutable-js/immutable-js) library for this purpouse :slightly_smiling_face:
+_Reaction.js_ can only observe changes in JavaScript plain objects. This means it can't observe changes made to complex types like [Date](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/Date), [Array](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/Array), [Map](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/Map), [Set](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/Set), [WeakMap](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/WeakMap) or [WeakSet](https://developer.mozilla.org/docs/Web/JavaScript/Referencia/Objetos_globales/WeakSet). However, you can use an immutable approach in order to achieve reactivity. We strongly recommend you to use the great [Immutable.js](https://github.com/immutable-js/immutable-js) library for this purpouse :slightly_smiling_face:
 
 For those who doesn't want to add another library to their projects, here we show you some _vanilla JS_ immutability examples for Date and Array objects:
 
@@ -280,7 +292,7 @@ const originalObject = {
 const reactiveObject = reactive(originalObject);
 
 reactiveObject.name = 'Charizard';
-console.log(originalObject.name); // "Charizard"
+console.log(originalObject.name); // prints "Charizard"
 ```
 
 However, changes made directly on the original object will not tracked by the system &ndash; this implies that computed properties as watchers will not work as expected. The recommendation is to not store the original object and always use the one returned by `reactive()`:
@@ -304,21 +316,21 @@ const pokemon = reactive({
 function computed<T>(callback: () => T): Readonly<Ref<T>>
 ```
 
-This method creates a read-only reference whose value is the result of invoking the `callback` function. It's value is automatically updated when any of its dependencies change:
+This method creates a read-only reference whose value is the result of invoking the `callback` function. It's value is automatically invalidated and recomputed when any of its dependencies change:
+
+
 
 ```javascript
 const pokemon = reactive({
     name: 'Pikachu'
 });
 
-const upperCaseName = computed(() => {
-    return pokemon.name.toUpperCase();
-});
+const upperCaseName = computed(() => pokemon.name.toUpperCase());
 
-console.log(upperCaseName.value); // "PIKACHU"
+console.log(upperCaseName.value); // prints "PIKACHU"
 
-pokemon.name = 'Charizard';
-console.log(upperCaseName.value); // "CHARIZARD"
+pokemon.name = 'Charizard'; // old value is invalidated
+console.log(upperCaseName.value); // value is recomputed, and "CHARIZARD" is printed
 ```
 
 You can also use a reference as a dependency:
@@ -326,21 +338,18 @@ You can also use a reference as a dependency:
 ```javascript
 const name = ref('Pikachu');
 
-const upperCaseName = computed(() => {
-    return name.value.toUpperCase();
-});
+const upperCaseName = computed(() => name.value.toUpperCase());
 
-console.log(upperCaseName.value); // "PIKACHU"
+console.log(upperCaseName.value); // prints "PIKACHU"
 
 name.value = 'Charizard';
-console.log(upperCaseName.value); // "CHARIZARD"
+console.log(upperCaseName.value); // prints "CHARIZARD"
 ```
 
 If you try to modify a computed property, you will get an error:
 
 ```javascript
-upperCaseName.value = 'MEWTWO';
-// Error: Cannot modify the value of a readonly reference
+upperCaseName.value = 'MEWTWO'; // Error: Cannot modify the value of a readonly reference
 ```
 
 ### watch()
@@ -358,7 +367,7 @@ type StopHandle = () => void;
 type CleanupRegistrator = (invalidate: () => void) => void;
 ```
 
-This method allows you to define a watcher function that will be executed every time one of it's dependencies changes. You can define its dependencies using the `source` parameter, or let `Reaction.js` to track them for you.
+This method allows you to define a watcher function that will be executed every time one of it's dependencies changes. You can define its dependencies using the `source` parameter, or let _Reaction.js_ to track them for you.
 
 Once the watcher is created, its callback is run immediately for the first time. After that, `watch()` method returns an `StopHandle` callback. This is a function that you can invoke whenever you want to stop watching changes on the dependencies (see [StopHandle](#stophandle)).
 
@@ -372,18 +381,18 @@ Let's see some examples! :grin:
 function watch(callback: SimpleEffect): StopHandle;
 ```
 
-This signature allows you to define a watcher without explicitly specify its dependencies. `Reaction.js` will track properties read by the `callback` every time it is executed.
+This signature allows you to define a watcher without explicitly specify its dependencies. _Reaction.js_ will track properties read by the `callback` every time it is executed.
 
 Let's see the following code:
 
 ```javascript
 const pokemon = reactive({
-    name: 'Pikachu',
-    level: 5
+  name: 'Pikachu',
+  level: 5
 });
 
-watch(() => {
-	const {name, level} = pokemon;
+watch(onCleanup => {
+    const {name, level} = pokemon;
     console.log(`${name} grew to level ${level}`);
 });
 ```
@@ -428,7 +437,97 @@ function watch<T>(source: Ref<T> | () => T, callback: WatcherCallBack<T>): StopH
 
 :construction: _This section is under construction_ :construction:
 
-_TODO: explain that you can use a custom callback or a reference as a source. Then then callback will be executed only when the source's properties are changed._
+This signature allows you to manually define the `source` (the dependencies) of the watcher. This is very useful when you want to read multiple properties inside the watcher's `callback`, but you only want to execute the callback when some of them changes.
+
+It is possible to define watcher's `source` in two ways:
+
+##### Using a reference
+
+```javascript
+const trainersName = ref('Ash');
+
+const pokemon = reactive({
+    name: 'Pikachu',
+    level: 5
+});
+
+watch(trainersName, () => {
+    console.log(`${trainersName.value} is the trainer of ${pokemon.name}`);
+});
+```
+
+Console output will be:
+
+```javascript
+"Ash is the trainer of Pikachu" // initial watcher's execution
+```
+
+As you can see, inside the watcher's `callback` both `trainersName.value` and `pokemon.name` values are read, but the `source` is `trainersName`. This means that the watcher will be triggered only when `trainersName`'s value is changed, so changing the `pokemon.name` property will not trigger the execution anymore.
+
+Imagine that you modify the name of the pokemon:
+
+```javascript
+pokemon.name = 'Eevee';
+```
+
+No console output will be produced. Now, imagine you modify the trainer's name:
+
+```javascript
+trainersName.value = 'Gary';
+```
+
+Console output will be:
+
+```javascript
+"Gary is the trainer of Eevee"
+```
+
+##### Using a custom source callback
+
+Let's see the following code:
+
+```javascript
+const pokemon = reactive({
+  name: 'Pikachu',
+  level: 5
+});
+
+watch(
+    // Only changes in 'level' property will trigger the watcher's execution
+    () => pokemon.level,
+    () => {
+        const {name, level} = pokemon;
+        console.log(`${name} grew to level ${level}`);
+    }
+);
+```
+
+Console output will be:
+
+```javascript
+"Pikachu grew to level 5" // initial watcher's execution
+```
+
+As you can see, watcher's callback access `name` and `level` properties from `pokemon` object. However, only `level` property is defined as a dependency. This means that you can modify the `name` as many times you want, and the watcher will not be executed again:
+
+```javascript
+pokemon.name = 'Charizard';
+pokemon.name = 'Mewtwo';
+```
+
+No console output will be produced. Then you change the pokemon's level:
+
+```javascript
+pokemon.level = 70;
+```
+
+Console output will be:
+
+```javascript
+"Mewtwo grew to level 70"
+```
+
+
 
 #### StopHandle
 
