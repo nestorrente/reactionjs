@@ -1,6 +1,4 @@
 
-
-
 # Reaction.js
 
 Reactive objects, computed properties and watchers inspired by Vue.js [Composition API](https://github.com/vuejs/composition-api-rfc).
@@ -13,22 +11,24 @@ We are working hard to bring you a production-ready library as soon as possible 
 
 + **[Why Reaction.js?](#why-reactionjs)**
 + **[Installation](#installation)**
- + **[Using NPM](#using-npm)**
- + **[Using `<script>` tag](#using-script-tag)**
+    + **[Using NPM](#using-npm)**
+    + **[Using `<script>` tag](#using-script-tag)**
 + **[Usage](#usage)**
- + **[Using `import`](#using-import)**
- + **[Using `Reaction` object](#using-reaction-object)**
+    + **[Using `import`](#using-import)**
+    + **[Using `Reaction` object](#using-reaction-object)**
 + **[Method reference](#method-reference)**
- + **[ref()](#ref)**
- + **[reactive()](#reactive)**
- + **[References inside reactive objects](#references-inside-reactive-objects)**
- + **[Reactivity limitations](#reactivity-limitations)**
- + **[Caveats](#caveats)**
- + **[computed()](#computed)**
- + **[watch()](#watch)**
- + **[Watcher with implicit dependencies](#watcher-with-implicit-dependencies)**
- + **[Explicit dependency declaration](#explicit-dependency-declaration)**
- + **[nextTick()](#nexttick)**
+    + **[ref()](#ref)**
+    + **[reactive()](#reactive)**
+        + **[References inside reactive objects](#references-inside-reactive-objects)**
+        + **[Reactivity limitations](#reactivity-limitations)**
+        + **[Caveats](#caveats)**
+    + **[computed()](#computed)**
+    + **[watch()](#watch)**
+        + **[Simple effect watcher](#simple-effect-watcher)**
+        + **[Watcher with source and callback](#watcher-with-source-and-callback)**
+        + **[CleanupRegistrator](#cleanupregistrator)**
+        + **[StopHandle](#stophandle)**
+    + **[nextTick()](#nexttick)**
 
 ## Why Reaction.js?
 
@@ -369,173 +369,151 @@ type CleanupRegistrator = (invalidate: () => void) => void;
 
 This method allows you to define a watcher function that will be executed every time one of it's dependencies changes. You can define its dependencies using the `source` parameter, or let _Reaction.js_ to track them for you.
 
-Once the watcher is created, its callback is run immediately for the first time. After that, `watch()` method returns an `StopHandle` callback. This is a function that you can invoke whenever you want to stop watching changes on the dependencies (see [StopHandle](#stophandle)).
+Watchers are executed asynchronously. This means that you can do several data modifications in a row before any watcher is executed. If you want to wait for watcher's execution before continue, you can use the [`nextTick()`](#nexttick) function.   
 
-_Note:_ watchers are executed asynchronously. This means that you can do several data modifications in a row before any watcher is executed. If you want to wait for watcher's execution before continue, you can use the [`nextTick()`](#nexttick) function.
+We will cover all the `watch()` function features in an incremental way.
 
-Let's see some examples! :grin:
+#### Simple effect watcher
 
-#### Watcher with implicit dependencies
-
-```typescript
-function watch(callback: SimpleEffect): StopHandle;
-```
-
-This signature allows you to define a watcher without explicitly specify its dependencies. _Reaction.js_ will track properties read by the `callback` every time it is executed.
-
-Let's see the following code:
+Let's define some data:
 
 ```javascript
-const pokemon = reactive({
-  name: 'Pikachu',
-  level: 5
-});
-
-watch(onCleanup => {
-    const {name, level} = pokemon;
-    console.log(`${name} grew to level ${level}`);
-});
-```
-
-Console output will be:
-
-```javascript
-"Pikachu grew to level 5" // initial watcher's execution
-```
-
-As you can see, watcher's callback access `name` and `level` properties from `pokemon` object. Then, every time that `name` or `level` values change, callback is executed again. In example, imagine that you change the pokemon's level:
-
-```javascript
-pokemon.level = 6;
-```
-
-Console output will be:
-
-```javascript
-"Pikachu grew to level 6"
-```
-
-Then you change the pokemon's name:
-
-```javascript
-pokemon.name = 'Charizard';
-```
-
-Console output will be:
-
-```javascript
-"Charizard grew to level 6"
-```
-
-That's great, but... what if you want the watcher to be executed only when `level` is changed? Keep reading!
-
-#### Explicit dependency declaration
-
-```typescript
-function watch<T>(source: Ref<T> | () => T, callback: WatcherCallBack<T>): StopHandle;
-```
-
-:construction: _This section is under construction_ :construction:
-
-This signature allows you to manually define the `source` (the dependencies) of the watcher. This is very useful when you want to read multiple properties inside the watcher's `callback`, but you only want to execute the callback when some of them changes.
-
-It is possible to define watcher's `source` in two ways:
-
-##### Using a reference
-
-```javascript
-const trainersName = ref('Ash');
-
 const pokemon = reactive({
     name: 'Pikachu',
-    level: 5
+    level: 5,
+    stats: {
+        attack: 13,
+        defense: 8,
+        speed: 17,
+        special: 11
+    },
 });
+```
 
-watch(trainersName, () => {
-    console.log(`${trainersName.value} is the trainer of ${pokemon.name}`);
+Now, let's define a watcher that allows us to do some operations when the Pokemon's level changes:
+
+```javascript
+watch(onCleanup => {
+
+    const {name, level, stats} = pokemon;
+
+    // Show info message
+    console.log(`${name} grew to level ${level}`);
+
+    // Update stats
+    stats.attack += 3;
+    stats.defense += 2;
+    stats.speed += 4;
+    stats.special += 2;
+
 });
 ```
 
-Console output will be:
+As soon as the watcher has been created, its callback is executed for the first time. As you can see, the callback reads all the properties from the `pokemon` object (`name`, `level` and `stats`). As we didn't declare a _source_ for the watcher, **every property accessed** within the callback **is considered a dependency**. This means that the callback will be executed every time that `name`, `level` or any of the `stats` changes. What if we want the callback to execute only on `level` property changes? We must define a _source_.
+
+_Note: you may have noticed the `onCleanup` callback parameter. We will cover it in the [CleanupRegistrator](#cleanupregistrator) section._
+
+#### Watcher with source and callback
+
+`watch()` method allows you to define a **source**, which can be a **reference** or a **callback**, in order to specify the dependencies of the watcher.
+
+Let's rewrite the previous example in order to define the `level` property as the only dependency of the callback:
 
 ```javascript
-"Ash is the trainer of Pikachu" // initial watcher's execution
-```
-
-As you can see, inside the watcher's `callback` both `trainersName.value` and `pokemon.name` values are read, but the `source` is `trainersName`. This means that the watcher will be triggered only when `trainersName`'s value is changed, so changing the `pokemon.name` property will not trigger the execution anymore.
-
-Imagine that you modify the name of the pokemon:
-
-```javascript
-pokemon.name = 'Eevee';
-```
-
-No console output will be produced. Now, imagine you modify the trainer's name:
-
-```javascript
-trainersName.value = 'Gary';
-```
-
-Console output will be:
-
-```javascript
-"Gary is the trainer of Eevee"
-```
-
-##### Using a custom source callback
-
-Let's see the following code:
-
-```javascript
-const pokemon = reactive({
-  name: 'Pikachu',
-  level: 5
-});
-
 watch(
-    // Only changes in 'level' property will trigger the watcher's execution
+    // Source callback
     () => pokemon.level,
-    () => {
-        const {name, level} = pokemon;
-        console.log(`${name} grew to level ${level}`);
+
+    // Execution callback
+    (oldValue, newValue, onCleanup) => {
+
+        const {name, stats} = pokemon;
+
+        // Show info message
+        console.log(`${name} grew to level ${newValue}`);
+
+        // Update stats
+        stats.attack += 3;
+        stats.defense += 2;
+        stats.speed += 4;
+        stats.special += 2;
+
     }
 );
 ```
 
-Console output will be:
+This way, the watcher will ignore changes made on the other properties, and will execute its callback only on `level` property changes.
+
+_Note: every property accessed within the source callback is considered a dependency, no matter if that property is returned by the callback or not._
+
+As you can see, the execution callback now receives 2 more parameters:
+
+ - `oldValue`: the previous value of the dependency. In the first watcher's execution, its value is `undefined`.
+ - `newValue`: the new value of the dependency.
+ - `onCleanup`: we will cover it in the [CleanupRegistrator](#cleanupregistrator) section.
+
+Also, when your dependency is a reference, you can use the reference itself as the source of a watcher:
 
 ```javascript
-"Pikachu grew to level 5" // initial watcher's execution
+const nextLevel = computed(() => pokemon.level + 1);
+
+watch(
+    // this is equivalent to: () => nextLevel.value
+    nextLevel,
+    (newValue, oldValue, onCleanup) => {
+        const {name} = pokemon;
+        console.log(`${name}'s next level is ${newValue}`);
+    }
+);
 ```
 
-As you can see, watcher's callback access `name` and `level` properties from `pokemon` object. However, only `level` property is defined as a dependency. This means that you can modify the `name` as many times you want, and the watcher will not be executed again:
+Finally, if you want to define multiple dependencies, the source callback may return an array:
 
 ```javascript
-pokemon.name = 'Charizard';
-pokemon.name = 'Mewtwo';
+watch(
+    // Source callback
+    () => [
+        pokemon.stats.attack,
+        pokemon.stats.defense
+    ],
+
+    // Execution callback
+    (oldValues, newValues, onCleanup) => {
+        const {name} = pokemon;
+        const [oldAttack, oldDefense] = oldValues;
+        const [newAttack, newDefense] = newValues;
+        console.log(`${name}'s attack changed from ${oldAttack} to ${newAttack}`);
+        console.log(`${name}'s defense changed from ${oldDefense} to ${newDefense}`);
+    }
+)
 ```
 
-No console output will be produced. Then you change the pokemon's level:
+Please, notice that now `oldValues` and `newValues` parameters are arrays containing the old and new values of each of the dependencies respectively.
 
-```javascript
-pokemon.level = 70;
-```
+#### CleanupRegistrator
 
-Console output will be:
+:construction: _This section is under construction_ :construction:
 
-```javascript
-"Mewtwo grew to level 70"
-```
-
-
+<!--
+But before that, did you notice the `onCleanup` parameter? That parameter is a function that allows you to define a callback for execute some cleanup code just before the watcher gets executed again
+-->
 
 #### StopHandle
 
 :construction: _This section is under construction_ :construction:
 
-#### CleanupRegistrator
+The `StopHandle` object is a function returned by `watch()` method. You can call it whenever you want to stop a watcher &ndash; that is, prevent its future executions:
 
-:construction: _This section is under construction_ :construction:
+```javascript
+const stopWatcher = watch(() => {
+    const {name} = pokemon;
+    console.log(`Pokemon's name changed to: ${name}`);
+});
+
+pokemon.name = 'Charizard'; // will trigger watchers execution
+
+stopWatcher(); // watcher will not be executed anymore
+```
 
 ### nextTick()
 
