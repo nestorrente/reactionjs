@@ -355,12 +355,12 @@ Related types:
 type SimpleEffect = (onCleanup: CleanupRegistrator) => void;
 type WatcherCallBack<T> = (newVal: T, oldVal: T | undefined, onCleanup: CleanupRegistrator) => void;
 type StopHandle = () => void;
-type CleanupRegistrator = (invalidate: Runnable) => void;
+type CleanupRegistrator = (invalidate: () => void) => void;
 ```
 
 This method allows you to define a watcher function that will be executed every time one of it's dependencies changes. You can define its dependencies using the `source` parameter, or let `Reaction.js` to track them for you.
 
-Once the watcher is created, its callback is run immediately for the first time. After that, `watch()` method returns an `StopHandle` callback. This is a function that you can invoke whenever you want to stop watching changes on the dependencies.
+Once the watcher is created, its callback is run immediately for the first time. After that, `watch()` method returns an `StopHandle` callback. This is a function that you can invoke whenever you want to stop watching changes on the dependencies (see [StopHandle](#stophandle)).
 
 _Note:_ watchers are executed asynchronously. This means that you can do several data modifications in a row before any watcher is executed. If you want to wait for watcher's execution before continue, you can use the [`nextTick()`](#nexttick) function.
 
@@ -429,6 +429,14 @@ function watch<T>(source: Ref<T> | () => T, callback: WatcherCallBack<T>): StopH
 :construction: _This section is under construction_ :construction:
 
 _TODO: explain that you can use a custom callback or a reference as a source. Then then callback will be executed only when the source's properties are changed._
+
+#### StopHandle
+
+:construction: _This section is under construction_ :construction:
+
+#### CleanupRegistrator
+
+:construction: _This section is under construction_ :construction:
 
 ### nextTick()
 
