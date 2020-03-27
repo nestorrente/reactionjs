@@ -1,4 +1,3 @@
-
 # Reaction.js
 
 Reactive objects, computed properties and watchers inspired by Vue.js [Composition API](https://github.com/vuejs/composition-api-rfc).
@@ -24,6 +23,8 @@ We are working hard to bring you a production-ready library as soon as possible 
         + **[Caveats](#caveats)**
     + **[computed()](#computed)**
     + **[watch()](#watch)**
+        + **[Watcher with implicit dependencies](#watcher-with-implicit-dependencies)**
+        + **[Explicit dependency declaration](#explicit-dependency-declaration)**
     + **[nextTick()](#nexttick)**
 
 ## Why Reaction.js?
@@ -346,8 +347,7 @@ upperCaseName.value = 'MEWTWO';
 
 ```typescript
 function watch(callback: SimpleEffect): StopHandle;
-function watch<T>(source: Ref<T>, callback: WatcherCallBack<T>): StopHandle;
-function watch<T>(source: () => T, callback: WatcherCallBack<T>): StopHandle;
+function watch<T>(source: Ref<T> | () => T, callback: WatcherCallBack<T>): StopHandle;
 ```
 Related types:
 
@@ -358,17 +358,23 @@ type StopHandle = () => void;
 type CleanupRegistrator = (invalidate: Runnable) => void;
 ```
 
-#### Simple watch callback
+This method allows you to define a watcher function that will be executed every time one of it's dependencies changes. You can define its dependencies using the `source` parameter, or let `Reaction.js` to track them for you.
+
+Once the watcher is created, its callback is run immediately for the first time. After that, `watch()` method returns an `StopHandle` callback. This is a function that you can invoke whenever you want to stop watching changes on the dependencies.
+
+_Note:_ watchers are executed asynchronously. This means that you can do several data modifications in a row before any watcher is executed. If you want to wait for watcher's execution before continue, you can use the [`nextTick()`](#nexttick) function.
+
+Let's see some examples! :grin:
+
+#### Watcher with implicit dependencies
 
 ```typescript
 function watch(callback: SimpleEffect): StopHandle;
 ```
 
-:construction: _This section is under construction and is subject to change_ :construction:
+This signature allows you to define a watcher without explicitly specify its dependencies. `Reaction.js` will track properties read by the `callback` every time it is executed.
 
-Allows you to define a watcher function that will be executed every time one of it's dependencies changes.
-
-Watchers are executed for the first time immediately after being created in order to track its dependencies:
+Let's see the following code:
 
 ```javascript
 const pokemon = reactive({
@@ -377,52 +383,52 @@ const pokemon = reactive({
 });
 
 watch(() => {
-    const { name, level } = pokemon;
+	const {name, level} = pokemon;
     console.log(`${name} grew to level ${level}`);
 });
-
-pokemon.level = 6;
 ```
 
 Console output will be:
 
 ```javascript
 "Pikachu grew to level 5" // initial watcher's execution
-"Pikachu grew to level 6" // execution after changing "level" to 6
 ```
 
-Watchers are executed asynchronously, so you can do several modifications in a row:
+As you can see, watcher's callback access `name` and `level` properties from `pokemon` object. Then, every time that `name` or `level` values change, callback is executed again. In example, imagine that you change the pokemon's level:
 
 ```javascript
-pokemon.level = 7;
-pokemon.level = 8;
-pokemon.level = 9;
-pokemon.level = 10;
+pokemon.level = 6;
 ```
 
 Console output will be:
 
 ```javascript
-"Pikachu grew to level 10" // watcher will execute only after the last change
+"Pikachu grew to level 6"
 ```
 
-You can force intermediate executions by using the [`nextTick()`](#nexttick) function.
+Then you change the pokemon's name:
 
-#### Using a reference as source
+```javascript
+pokemon.name = 'Charizard';
+```
+
+Console output will be:
+
+```javascript
+"Charizard grew to level 6"
+```
+
+That's great, but... what if you want the watcher to be executed only when `level` is changed? Keep reading!
+
+#### Explicit dependency declaration
 
 ```typescript
-function watch<T>(source: Ref<T>, callback: WatcherCallBack<T>): StopHandle;
+function watch<T>(source: Ref<T> | () => T, callback: WatcherCallBack<T>): StopHandle;
 ```
 
 :construction: _This section is under construction_ :construction:
 
-#### Using custom callback as source
-
-```typescript
-function watch<T>(source: () => T, callback: WatcherCallBack<T>): StopHandle;
-```
-
-:construction: _This section is under construction_ :construction:
+_TODO: explain that you can use a custom callback or a reference as a source. Then then callback will be executed only when the source's properties are changed._
 
 ### nextTick()
 
@@ -432,7 +438,7 @@ function nextTick(callback: () => void): void
 
 Allows you to execute a portion of code in the next event cycle of the execution environment. This is actually the same as `setTimeout(callback, 0)`.
 
-This method is very useful when you are doing multiple data modifications and you want to let watchers being executed between those changes:
+This method is very useful when you are doing multiple data modifications and you want wait for watcher's execution before continue:
 
 ```javascript
 const pokemon = reactive({
