@@ -31,7 +31,9 @@ export default abstract class AbstractWatch<T, U> {
 					}
 
 					nextTick(() => {
-						this.onNextTickAfterWatcherInvalidate(this.watcherInstance!);
+						if (!this.stopped) {
+							this.onNextTickAfterWatcherInvalidate(this.watcherInstance!);
+						}
 					});
 
 					this.invalidated = true;
