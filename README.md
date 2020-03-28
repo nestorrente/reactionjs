@@ -68,10 +68,10 @@ Or, if you prefer, you can use any of the following CDN repositories:
 
 ```html
 <!-- Unpkg -->
-<script src="https://unpkg.com/@nestorrente/reactionjs@0.3.2"></script>
+<script src="https://unpkg.com/@nestorrente/reactionjs@0.3.3"></script>
 
 <!-- JsDelivr -->
-<script src="https://cdn.jsdelivr.net/npm/@nestorrente/reactionjs@0.3.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@nestorrente/reactionjs@0.3.3"></script>
 ```
 
 The script will create a global  `Reaction` object, which contains all the exported methods.
