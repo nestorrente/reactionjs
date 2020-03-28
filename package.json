@@ -1,6 +1,6 @@
 {
 	"name": "@nestorrente/reactionjs",
-	"version": "0.3.2",
+	"version": "0.3.3",
 	"description": "",
 	"main": "dist/reaction.bundle.js",
 	"module": "dist/reaction.esm.js",
