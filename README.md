@@ -1,4 +1,3 @@
-
 # Reaction.js
 
 Reactive objects, computed properties and watchers inspired by Vue.js [Composition API](https://github.com/vuejs/composition-api-rfc).
@@ -492,28 +491,89 @@ Please, notice that now `oldValues` and `newValues` parameters are arrays contai
 
 #### CleanupRegistrator
 
-:construction: _This section is under construction_ :construction:
+If you have read the previous sections, you may noticed the `onCleanup` parameter of the watcher's callback. This parameter is a function that allows you to register a cleanup callback that will be executed right before the next watcher's execution. You can use it to execute some cleanup operations.
 
-<!--
-But before that, did you notice the `onCleanup` parameter? That parameter is a function that allows you to define a callback for execute some cleanup code just before the watcher gets executed again
--->
+```javascript
+const pokemonStatus = ref('poison');
+
+watch(
+	pokemonStatus,
+	(newValue, oldValue, onCleanup) => {
+		console.log(`Status changed to '${newValue}'`);
+
+		onCleanup(() => console.log(`Status is not '${newValue}' anymore`));
+	}
+);
+
+pokemonStatus.value = 'burn';
+```
+
+Console output will be:
+
+```javascript
+"Status changed to 'poison'" // initial watcher's execution
+"Status is not 'poison' anymore"
+"Status changed to 'burn'"
+```
+
+You can register at most 1 cleanup callback. If you call `onCleanup` multiple times, only the last callback will be registered:
+
+```javascript
+const pokemonStatus = ref('poison');
+
+watch(
+	pokemonStatus,
+	(newValue, oldValue, onCleanup) => {
+		console.log(`Status changed to '${newValue}'`);
+
+		// this will be ignored
+		onCleanup(() => console.log(`1st cleanup callback`));
+
+		// this will be executed
+		onCleanup(() => console.log(`2nd cleanup callback`));
+	}
+);
+
+pokemonStatus.value = 'burn';
+```
+
+Console output will be:
+
+```javascript
+"Status changed to 'poison'" // initial watcher's execution
+"2nd cleanup callback"
+"Status changed to 'burn'"
+```
 
 #### StopHandle
 
-:construction: _This section is under construction_ :construction:
+The `StopHandle` object is a function returned by `watch()` method. You can call it whenever you want to stop a watcher &ndash; that is, prevent its future executions.
 
-The `StopHandle` object is a function returned by `watch()` method. You can call it whenever you want to stop a watcher &ndash; that is, prevent its future executions:
+Fisrt, store the stop handle function like that:
 
 ```javascript
 const stopWatcher = watch(() => {
     const {name} = pokemon;
     console.log(`Pokemon's name changed to: ${name}`);
 });
+```
 
-pokemon.name = 'Charizard'; // will trigger watchers execution
+Whenever you want, you can stop it this way:
 
+```javascript
 stopWatcher(); // watcher will not be executed anymore
 ```
+
+This will trigger the **cleanup** callback registered in the last watcher's execution (if any).
+
+Changes made in the same _event cycle_ in which `stopWatcher()` is called **will not trigger** the watcher's execution. In example:
+
+```javascript
+pokemon.name = 'Charizard'; // this will not trigger the watcher
+stopWatcher();
+```
+
+You can know more about _event cycles_ in the [`nextTick()`](#nexttick) method section.
 
 ### nextTick()
 
@@ -521,9 +581,9 @@ stopWatcher(); // watcher will not be executed anymore
 function nextTick(callback: () => void): void
 ```
 
-Allows you to execute a portion of code in the next event cycle of the execution environment. This is actually the same as `setTimeout(callback, 0)`.
+Allows you to execute a portion of code in the **next event cycle** of the execution environment. This is actually the same as `setTimeout(callback, 0)`.
 
-This method is very useful when you are doing multiple data modifications and you want wait for watcher's execution before continue:
+This method is very useful when you are doing multiple data modifications and you want to **wait for watcher's execution** before continue:
 
 ```javascript
 const pokemon = reactive({
@@ -540,6 +600,7 @@ pokemon.level = 6;
 pokemon.level = 7;
 pokemon.level = 8;
 
+// Wait for watcher's execution...
 nextTick(() => {
     pokemon.level = 9;
     pokemon.level = 10;
