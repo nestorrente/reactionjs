@@ -1,7 +1,7 @@
 import ref from './ref';
 import reactive from './reactive';
 import computed from './computed';
-import watch from './watch';
+import {watch, watchEffect} from './watch';
 import nextTick from './nextTick';
 
 export {
@@ -9,5 +9,6 @@ export {
 	reactive,
 	computed,
 	watch,
+	watchEffect,
 	nextTick
 };

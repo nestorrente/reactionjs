@@ -39,15 +39,7 @@ export default class WatchSource<T> extends AbstractWatch<T, T> {
 	}
 
 	protected afterWatcherCreation(watcher: Watcher<T>): void {
-
-		const newResult = watcher.getResult();
-
-		this.callback(newResult, this.lastResult, cleanup => {
-			this.cleanupCallbackRegister.registerCallback(cleanup);
-		});
-
-		this.lastResult = newResult;
-
+		this.lastResult = watcher.getResult();
 	}
 
 }

@@ -6,6 +6,9 @@ Reactive objects, computed properties and watchers inspired by Vue.js [Compositi
 
 We are working hard to bring you a production-ready library as soon as possible :pick:
 
+:warning: The current implementation follows the Composition API v0.3.4 spec.
+It may differ with the current version of the Composition API (`1.0.0-beta.10` at this moment).
+
 ## Table of contents
 
 + **[Why Reaction.js?](#why-reactionjs)**
@@ -67,10 +70,10 @@ Or, if you prefer, you can use any of the following CDN repositories:
 
 ```html
 <!-- Unpkg -->
-<script src="https://unpkg.com/@nestorrente/reactionjs@0.3.3"></script>
+<script src="https://unpkg.com/@nestorrente/reactionjs@0.4.0"></script>
 
 <!-- JsDelivr -->
-<script src="https://cdn.jsdelivr.net/npm/@nestorrente/reactionjs@0.3.3"></script>
+<script src="https://cdn.jsdelivr.net/npm/@nestorrente/reactionjs@0.4.0"></script>
 ```
 
 The script will create a global  `Reaction` object, which contains all the exported methods.
@@ -351,28 +354,28 @@ If you try to modify a computed property, you will get an error:
 upperCaseName.value = 'MEWTWO'; // Error: Cannot modify the value of a readonly reference
 ```
 
-### watch()
+### watch() and watchEffect()
 
 ```typescript
-function watch(callback: SimpleEffect): StopHandle;
 function watch<T>(source: Ref<T> | () => T, callback: WatcherCallBack<T>): StopHandle;
+function watchEffect(callback: SimpleEffect): StopHandle;
 ```
 Related types:
 
 ```typescript
-type SimpleEffect = (onCleanup: CleanupRegistrator) => void;
-type WatcherCallBack<T> = (newVal: T, oldVal: T | undefined, onCleanup: CleanupRegistrator) => void;
-type StopHandle = () => void;
+type WatcherCallBack<T> = (newValue: T, oldValue: T | undefined, onCleanup: CleanupRegistrator) => void;
 type CleanupRegistrator = (invalidate: () => void) => void;
+type StopHandle = () => void;
+type SimpleEffect = (onCleanup: CleanupRegistrator) => void;
 ```
 
-This method allows you to define a watcher function that will be executed every time one of it's dependencies changes. You can define its dependencies using the `source` parameter, or let _Reaction.js_ to track them for you.
+These methods allow you to define a watcher function that will be executed every time one of it's dependencies changes. You can define its dependencies explicitly using the `source` parameter of the `watch()` method, or let _Reaction.js_ to track them for you using the `watchEffect()` method.
 
 Watchers are executed asynchronously. This means that you can do several data modifications in a row before any watcher is executed. If you want to wait for watcher's execution before continue, you can use the [`nextTick()`](#nexttick) function.   
 
-We will cover all the `watch()` function features in an incremental way.
+We will cover watcher's features in an incremental way.
 
-#### Simple effect watcher
+#### Simple effect watcher using watchEffect()
 
 Let's define some data:
 
@@ -392,7 +395,7 @@ const pokemon = reactive({
 Now, let's define a watcher that allows us to do some operations when the Pokemon's level changes:
 
 ```javascript
-watch(onCleanup => {
+watchEffect(onCleanup => {
 
     const {name, level, stats} = pokemon;
 
@@ -408,11 +411,11 @@ watch(onCleanup => {
 });
 ```
 
-As soon as the watcher has been created, its callback is executed for the first time. As you can see, the callback reads all the properties from the `pokemon` object (`name`, `level` and `stats`). As we didn't declare a _source_ for the watcher, **every property accessed** within the callback **is considered a dependency**. This means that the callback will be executed every time that `name`, `level` or any of the `stats` changes. What if we want the callback to execute only on `level` property changes? We must define a _source_.
+As soon as the watcher has been created, its callback is executed for the first time in order to track its dependencies. As you can see, the callback reads some properties from the `pokemon` object (`name`, `level` and `stats`). As we didn't define the dependencies of the watcher explicitly, **every property accessed** within the callback **is considered a dependency**. This means that the callback will be executed every time that `name`, `level` or any of the `stats` changes. What if we want the callback to execute only on `level` property changes? We must define a _source_ using the `watch()` method.
 
 _Note: you may have noticed the `onCleanup` callback parameter. We will cover it in the [CleanupRegistrator](#cleanupregistrator) section._
 
-#### Watcher with source and callback
+#### Watcher with source and callback using watch()
 
 `watch()` method allows you to define a **source**, which can be a **reference** or a **callback**, in order to specify the dependencies of the watcher.
 
@@ -424,7 +427,7 @@ watch(
     () => pokemon.level,
 
     // Execution callback
-    (oldValue, newValue, onCleanup) => {
+    (newValue, oldValue, onCleanup) => {
 
         const {name, stats} = pokemon;
 
@@ -447,9 +450,11 @@ _Note: every property accessed within the source callback is considered a depend
 
 As you can see, the execution callback now receives 2 more parameters:
 
- - `oldValue`: the previous value of the dependency. In the first watcher's execution, its value is `undefined`.
- - `newValue`: the new value of the dependency.
+ - `newValue`: the new value of the dependency&ast;.
+ - `oldValue`: the previous value of the dependency&ast;. In the first watcher's execution, its value is `undefined`.
  - `onCleanup`: we will cover it in the [CleanupRegistrator](#cleanupregistrator) section.
+
+&ast;: when using a callback as the _source_ of the watcher, the concept _value of the dependency_ refers to the value returned by the callback.
 
 Also, when your dependency is a reference, you can use the reference itself as the source of a watcher:
 
@@ -466,28 +471,39 @@ watch(
 );
 ```
 
-Finally, if you want to define multiple dependencies, the source callback may return an array:
+Finally, if you want to define multiple dependencies, you can return an object or array containing all of them in the _source_ callback:
 
 ```javascript
 watch(
-    // Source callback
+    // Source callback - define multiple dependencies by returning an object
+    () => {
+        const {attack, defense} = pokemon.stats;
+        return {attack, defense};
+    },
+
+    // Execution callback - "newValue" and "oldValue" are now objects
+    (newValue, oldValue, onCleanup) => {
+        const {name} = pokemon;
+        console.log(`${name}'s attack changed from ${oldValue.attack} to ${newValue.attack}`);
+        console.log(`${name}'s defense changed from ${oldValue.defense} to ${newValue.defense}`);
+    }
+);
+
+watch(
+    // Source callback - define multiple dependencies by returning an array
     () => [
         pokemon.stats.attack,
         pokemon.stats.defense
     ],
 
-    // Execution callback
-    (oldValues, newValues, onCleanup) => {
+    // Execution callback - "newValue" and "oldValue" are now arrays
+    (newValue, oldValue, onCleanup) => {
         const {name} = pokemon;
-        const [oldAttack, oldDefense] = oldValues;
-        const [newAttack, newDefense] = newValues;
-        console.log(`${name}'s attack changed from ${oldAttack} to ${newAttack}`);
-        console.log(`${name}'s defense changed from ${oldDefense} to ${newDefense}`);
+        console.log(`${name}'s attack changed from ${oldValue[0]} to ${newValue[0]}`);
+        console.log(`${name}'s defense changed from ${oldValue[1]} to ${newValue[1]}`);
     }
-)
+);
 ```
-
-Please, notice that now `oldValues` and `newValues` parameters are arrays containing the old and new values of each of the dependencies respectively.
 
 #### CleanupRegistrator
 
@@ -497,12 +513,12 @@ If you have read the previous sections, you may noticed the `onCleanup` paramete
 const pokemonStatus = ref('poison');
 
 watch(
-	pokemonStatus,
-	(newValue, oldValue, onCleanup) => {
-		console.log(`Status changed to '${newValue}'`);
+    pokemonStatus,
+    (newValue, oldValue, onCleanup) => {
+        console.log(`Status changed to '${newValue}'`);
 
-		onCleanup(() => console.log(`Status is not '${newValue}' anymore`));
-	}
+        onCleanup(() => console.log(`Status is not '${newValue}' anymore`));
+    }
 );
 
 pokemonStatus.value = 'burn';
@@ -522,16 +538,16 @@ You can register at most 1 cleanup callback. If you call `onCleanup` multiple ti
 const pokemonStatus = ref('poison');
 
 watch(
-	pokemonStatus,
-	(newValue, oldValue, onCleanup) => {
-		console.log(`Status changed to '${newValue}'`);
+    pokemonStatus,
+    (newValue, oldValue, onCleanup) => {
+        console.log(`Status changed to '${newValue}'`);
 
-		// this will be ignored
-		onCleanup(() => console.log(`1st cleanup callback`));
+        // this will be ignored
+        onCleanup(() => console.log(`1st cleanup callback`));
 
-		// this will be executed
-		onCleanup(() => console.log(`2nd cleanup callback`));
-	}
+        // this will be executed
+        onCleanup(() => console.log(`2nd cleanup callback`));
+    }
 );
 
 pokemonStatus.value = 'burn';

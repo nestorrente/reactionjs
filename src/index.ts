@@ -1,4 +1,4 @@
-import {computed, nextTick, reactive, ref, watch} from './methods';
+import {computed, nextTick, reactive, ref, watch, watchEffect} from './methods';
 import Ref from './util/Ref';
 
 export {
@@ -6,6 +6,7 @@ export {
 	reactive,
 	computed,
 	watch,
+	watchEffect,
 	nextTick,
 	Ref
 };
