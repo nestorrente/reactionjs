@@ -7,9 +7,6 @@ Reactive objects, computed properties and watchers inspired by Vue.js [Compositi
 
 We are working hard to bring you a production-ready library as soon as possible :pick:
 
-:warning: The current implementation follows the Composition API v0.3.4 spec.
-It may differ with the current version of the Composition API (`1.0.0-beta.10` at this moment).
-
 ## Table of contents
 
 + **[Why Reaction.js?](#why-reactionjs)**
