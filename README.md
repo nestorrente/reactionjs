@@ -26,8 +26,8 @@ It may differ with the current version of the Composition API (`1.0.0-beta.10` a
         + **[Caveats](#caveats)**
     + **[computed()](#computed)**
     + **[watch()](#watch)**
-        + **[Simple effect watcher](#simple-effect-watcher)**
-        + **[Watcher with source and callback](#watcher-with-source-and-callback)**
+        + **[Simple effect watcher using watchEffect()](#simple-effect-watcher-using-watcheffect)**
+        + **[Watcher with source and callback using watch()](#watcher-with-source-and-callback-using-watch)**
         + **[CleanupRegistrator](#cleanupregistrator)**
         + **[StopHandle](#stophandle)**
     + **[nextTick()](#nexttick)**
