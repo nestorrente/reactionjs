@@ -6,12 +6,14 @@ export default class WatchSource<T> extends AbstractWatch<T, T> {
 
 	private readonly source: WatcherSource<T>;
 	private readonly callback: WatcherCallBack<T>;
+	private readonly immediate: boolean;
 	private lastResult?: T;
 
-	constructor(source: WatcherSource<T>, callback: WatcherCallBack<T>) {
+	constructor(source: WatcherSource<T>, callback: WatcherCallBack<T>, immediate: boolean) {
 		super();
 		this.source = source;
 		this.callback = callback;
+		this.immediate = immediate;
 	}
 
 	protected getWatcherSource(): WatcherSource<T> {
@@ -39,7 +41,17 @@ export default class WatchSource<T> extends AbstractWatch<T, T> {
 	}
 
 	protected afterWatcherCreation(watcher: Watcher<T>): void {
-		this.lastResult = watcher.getResult();
+
+		const newResult = watcher.getResult();
+
+		if (this.immediate) {
+			this.callback(newResult, this.lastResult, cleanup => {
+				this.cleanupCallbackRegister.registerCallback(cleanup);
+			});
+		}
+
+		this.lastResult = newResult;
+
 	}
 
 }

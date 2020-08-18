@@ -1,5 +1,5 @@
 import {WatcherSource} from '../../util/Watcher';
-import {SimpleEffect, StopHandle, WatcherCallBack} from './types';
+import {SimpleEffect, StopHandle, WatcherCallBack, WatchOptions} from './types';
 import WatchSimpleEffect from './WatchSimpleEffect';
 import WatchSource from './WatchSource';
 
@@ -17,8 +17,8 @@ export function watchEffect(callback: SimpleEffect): StopHandle {
 	return () => watchObject.stop();
 }
 
-export function watch<T>(source: WatcherSource<T>, callback: WatcherCallBack<T>): StopHandle {
-	const watchObject = new WatchSource(source, callback);
+export function watch<T>(source: WatcherSource<T>, callback: WatcherCallBack<T>, options?: WatchOptions): StopHandle {
+	const watchObject = new WatchSource(source, callback, !!options?.immediate);
 	watchObject.init();
 	return () => watchObject.stop();
 }

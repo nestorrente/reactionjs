@@ -1,3 +1,4 @@
+
 # Reaction.js
 
 Reactive objects, computed properties and watchers inspired by Vue.js [Composition API](https://github.com/vuejs/composition-api-rfc).
@@ -25,7 +26,7 @@ It may differ with the current version of the Composition API (`1.0.0-beta.10` a
         + **[Reactivity limitations](#reactivity-limitations)**
         + **[Caveats](#caveats)**
     + **[computed()](#computed)**
-    + **[watch()](#watch)**
+    + **[watch() and watchEffect()](#watch-and-watcheffect)**
         + **[Simple effect watcher using watchEffect()](#simple-effect-watcher-using-watcheffect)**
         + **[Watcher with source and callback using watch()](#watcher-with-source-and-callback-using-watch)**
         + **[CleanupRegistrator](#cleanupregistrator)**
@@ -70,10 +71,10 @@ Or, if you prefer, you can use any of the following CDN repositories:
 
 ```html
 <!-- Unpkg -->
-<script src="https://unpkg.com/@nestorrente/reactionjs@0.4.1"></script>
+<script src="https://unpkg.com/@nestorrente/reactionjs@0.4.2"></script>
 
 <!-- JsDelivr -->
-<script src="https://cdn.jsdelivr.net/npm/@nestorrente/reactionjs@0.4.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/@nestorrente/reactionjs@0.4.2"></script>
 ```
 
 The script will create a global  `Reaction` object, which contains all the exported methods.
@@ -357,16 +358,23 @@ upperCaseName.value = 'MEWTWO'; // Error: Cannot modify the value of a readonly 
 ### watch() and watchEffect()
 
 ```typescript
-function watch<T>(source: Ref<T> | () => T, callback: WatcherCallBack<T>): StopHandle;
+function watch<T>(source: Ref<T> | () => T,
+                  callback: WatcherCallBack<T>,
+                  options?: WatchOptions): StopHandle;
+
 function watchEffect(callback: SimpleEffect): StopHandle;
 ```
 Related types:
 
 ```typescript
 type WatcherCallBack<T> = (newValue: T, oldValue: T | undefined, onCleanup: CleanupRegistrator) => void;
+type SimpleEffect = (onCleanup: CleanupRegistrator) => void;
 type CleanupRegistrator = (invalidate: () => void) => void;
 type StopHandle = () => void;
-type SimpleEffect = (onCleanup: CleanupRegistrator) => void;
+
+interface WatchOptions {  
+   immediate?: boolean;  
+}
 ```
 
 These methods allow you to define a watcher function that will be executed every time one of it's dependencies changes. You can define its dependencies explicitly using the `source` parameter of the `watch()` method, or let _Reaction.js_ to track them for you using the `watchEffect()` method.
@@ -446,7 +454,23 @@ watch(
 
 This way, the watcher will ignore changes made on the other properties, and will execute its callback only on `level` property changes.
 
-_Note: every property accessed within the source callback is considered a dependency, no matter if that property is returned by the callback or not._
+_Note 1: every property accessed within the source callback is considered a dependency, no matter if it's returned by the callback or not._
+
+_Note 2: when using a source in order to define the watcher's dependencies, its callback is not executed until a change is made. If you want _Reaction.js_ to execute the callback immediately, you can use the `immediate` option:_
+
+```javascript
+watch(
+    // Source callback
+    () => pokemon.level,
+
+    // Execution callback
+    (newValue, oldValue, onCleanup) => {
+        // ... do something...
+    },
+    // Force the first execution of the callback
+    { immediately: true }
+);
+```
 
 As you can see, the execution callback now receives 2 more parameters:
 
@@ -518,7 +542,8 @@ watch(
         console.log(`Status changed to '${newValue}'`);
 
         onCleanup(() => console.log(`Status is not '${newValue}' anymore`));
-    }
+    },
+    { immediate: true }
 );
 
 pokemonStatus.value = 'burn';
@@ -547,7 +572,8 @@ watch(
 
         // this will be executed
         onCleanup(() => console.log(`2nd cleanup callback`));
-    }
+    },
+    { immediate: true }
 );
 
 pokemonStatus.value = 'burn';
@@ -563,18 +589,18 @@ Console output will be:
 
 #### StopHandle
 
-The `StopHandle` object is a function returned by `watch()` method. You can call it whenever you want to stop a watcher &ndash; that is, prevent its future executions.
+The `StopHandle` object is a function returned by `watch()` and `watchEffect()` methods. You can call it whenever you want to stop a watcher &ndash; that is, prevent its future executions.
 
-Fisrt, store the stop handle function like that:
+Fisrt, store the `StopHandle` callback in a variable:
 
 ```javascript
-const stopWatcher = watch(() => {
+const stopWatcher = watchEffect(() => {
     const {name} = pokemon;
     console.log(`Pokemon's name changed to: ${name}`);
 });
 ```
 
-Whenever you want, you can stop it this way:
+Whenever you want, you can invoke it in order to stop the watcher:
 
 ```javascript
 stopWatcher(); // watcher will not be executed anymore
@@ -585,7 +611,7 @@ This will trigger the **cleanup** callback registered in the last watcher's exec
 Changes made in the same _event cycle_ in which `stopWatcher()` is called **will not trigger** the watcher's execution. In example:
 
 ```javascript
-pokemon.name = 'Charizard'; // this will not trigger the watcher
+pokemon.name = 'Charizard'; // this will not trigger the watcher's execution
 stopWatcher();
 ```
 
