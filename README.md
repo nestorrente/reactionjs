@@ -81,7 +81,7 @@ The script will create a global  `Reaction` object, which contains all the expor
 ### Using `import`
 
 ```javascript
-import {ref, reactive, computed, watch, nextTick} from '@nestorrente/reactivejs';
+import {ref, reactive, computed, watch, nextTick} from '@nestorrente/reactionjs';
 
 const trainersName = ref('Ash');
 
